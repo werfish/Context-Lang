@@ -14,6 +14,8 @@ With Context, you can:
 
 ### The Developer is dead, long live the AI augmented cyberpunk developer. The CyDeveloper :)
 
+Inspiration for this quote from Angel AI [here](https://www.linkedin.com/posts/angeljsalazar_harness-releases-generative-ai-assistant-activity-7077308844099407873-xvYd?utm_source=share&utm_medium=member_desktop)
+
 ## Table of Contents
 1. [Introduction](#context-ai-powered-code-generation)
 2. [Context Description](#context-description)

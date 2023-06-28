@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='Context',
+    name='ContextLang',
     description='Cross-platform, AI code generator CLI tool and ContexLang preprocessor',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
@@ -47,7 +47,7 @@ setup(
         'Programming Language :: Rust',
         'Programming Language :: SQL',
         'Programming Language :: Visual Basic',
-        'Topic :: Software Development :: Code Generators'
+        'Topic :: Software Development :: Code Generators',
         'Topic :: Software Development :: Pre-processors'
     ],
 )

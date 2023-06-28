@@ -6,6 +6,12 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     version='0.1.2',
+    install_requires=[
+        'requests',
+        'python-dotenv',
+        'openai',
+        'tenacity'
+    ],
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     entry_points={

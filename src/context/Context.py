@@ -15,11 +15,11 @@ import argparse
 from dotenv import load_dotenv
 import os
 
-from config import Config
-from file_manager import get_file_paths
-from tag_parser import parse_tags
-from code_generator import generate_code
-from log import Log,configure_logger
+from .config import Config
+from .file_manager import get_file_paths
+from .tag_parser import parse_tags
+from .code_generator import generate_code
+from .log import Log,configure_logger
 
 logger = None
 

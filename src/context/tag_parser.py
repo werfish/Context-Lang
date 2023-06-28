@@ -14,7 +14,7 @@
 import re
 import traceback
 
-from log import Log
+from .log import Log
 
 class Task:
     def __init__(self, filepath, global_context, context_dict, prompts, prompt_outputs, prompt_output_tags):

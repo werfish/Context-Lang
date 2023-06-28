@@ -11,13 +11,12 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
-from openai_interface import generate_code_with_chat
 import traceback
 import re
 import json
 
-from log import Log
+from .openai_interface import generate_code_with_chat
+from .log import Log
 
 def generate_code(tasks):
     for task in tasks:

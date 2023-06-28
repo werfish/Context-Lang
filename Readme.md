@@ -77,7 +77,7 @@ pip install ContextLang
 CONTEXT_CONFIG_Open_Ai_Api_Key=<Your OpenAI API Key here>
 ```
 
-Remember to replace `<Your OpenAI API Key here>` with your actual API key. The comment characters should match those used in your project. In this example, we've added comment characters for HTML, CSS, and JavaScript.
+Remember to replace `<Your OpenAI API Key here>` with your actual API key.
 
 3. To use Context in your project, navigate to the base folder of your project and run the `Context` command:
 

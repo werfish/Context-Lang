@@ -10,7 +10,7 @@ setup(
     package_dir={"": "src"},
     entry_points={
         'console_scripts': [
-            'Context = Context:main',
+            'Context = context.Context:main',
         ],
     },
     author='Robert Mazurowski',

@@ -11,6 +11,7 @@
     - Reasearch Make VS Poeatry IN PROGRESS
     - Implement CI/CD to test features in different environments.
     - Rewrite the parser and language grammar in textX for allowing easy extending of the language
+    - Migrate from setup.py to pyproject.toml approach
 
 2. **Development Documentation**: Create a document detailing how to run the project for development.
 

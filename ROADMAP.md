@@ -22,6 +22,8 @@
 
 ### Context Features
 
+0. **PRIORITY**: Chat GPT4 api is availible for everyone and needs to be build in as an option.
+
 1. **Bug Fixing**: The priority is to fix any bugs in the Context preprocessor and code generation for V1 Spec of ContextLang.
 
 2. **Platform Compatibility**: Ensure Context works on all platforms.

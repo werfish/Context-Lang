@@ -12,6 +12,7 @@
     - Implement CI/CD to test features in different environments.
     - Rewrite the parser and language grammar in textX for allowing easy extending of the language
     - Migrate from setup.py to pyproject.toml approach
+    - Use langchain for all the functionality
 
 2. **Development Documentation**: Create a document detailing how to run the project for development.
 
@@ -45,5 +46,6 @@
 
 - **Separate Files**: Conceptualize and add a feature for using ContextLang in separate .ctxt files, which allow a simpler syntax and enable building a file from prompts declared in .ctxt. This is still in the concept stage.
 - **HEAD, TAIL, and MID Functions**: Add HEAD, TAIL, and MID functions to file imports in some version of the spec. This is also still in the concept stage.
+- **Streamlint frontend allowing chatting with the code base**: After running Context Analyze user should see a streamlit frontend allowing chatting with the codebase. (RESEARCHING THIS IN PROGRES, Frontend done, currently fixing bugs)
 
 If you have any ideas to extend the functionality, please contact me.

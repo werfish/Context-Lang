@@ -7,7 +7,10 @@
     - Integrate Linters, Formatters, etc.
     - Integrate Pytest/Coverage. Develop a strategy for testing cognitive features (for example, running and checking prompts?)
     - Integrate a make file compatible with both Windows and Linux.
+    - Another option is to use Poetry wchich I am currently looking into.
+    - Reasearch Make VS Poeatry IN PROGRESS
     - Implement CI/CD to test features in different environments.
+    - Rewrite the parser and language grammar in textX for allowing easy extending of the language
 
 2. **Development Documentation**: Create a document detailing how to run the project for development.
 

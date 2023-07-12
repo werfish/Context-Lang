@@ -114,7 +114,7 @@ def add(a,b):
 Now, using a prompt tag, we instruct the AI to create three additional functions for multiplication, division, and subtraction. We provide the previously created template by using the TEMPLATE context variable as a context to guide the AI's output. Keep in mind that global context will also be injected into the prompt. 
 
 ```python
-#<prompt:Functions>Write me a subtraction, division and multiplication functions for a and b based on the template function. {TEMPLATE} <prompt/>
+#<prompt:Functions>Write me a subtraction, division and multiplication functions for a and b based on the template function. {TEMPLATE} <prompt:Functions/>
 ```
 To indicate where the Functions prompt should output we use the name of the prompt enclose in {}. This is a one off operation.The output from the prompt will overwrite the following comment in the Python file when we run Context:
 
@@ -131,7 +131,7 @@ This tag will not get overwritten. Only the content between will be overwritten,
 
 The Functions variable can also be used as context in the prompt while it is used as an output tag, allowing modification over the produced or existing code.
 ```python
-#<prompt:Functions>Please correct the multiply function in the code, it should multiply instead of subtract. {Functions} <prompt/>
+#<prompt:Functions>Please correct the multiply function in the code, it should multiply instead of subtract. {Functions} <prompt:Functions/>
 #<Functions>
 def multiply(a,b):
 	return a - b

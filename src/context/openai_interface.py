@@ -60,7 +60,7 @@ functions = [
     }
 ]
 
-GPT_MODEL = "gpt-3.5-turbo-0613"
+GPT_MODEL = "gpt-4-0125-preview"
 
 def generate_code_with_chat(prompt):
     Log.logger.debug(f"Generated Prompt:\n{prompt}")
@@ -72,7 +72,7 @@ def generate_code_with_chat(prompt):
 
     try:
         response = openai.ChatCompletion.create(
-            model= "gpt-3.5-turbo-0301" , #"gpt-4-0613",  # Use the new GPT-4 model
+            model= "gpt-4-0125-preview"#"gpt-3.5-turbo-0301" , #"gpt-4-0613",  # Use the new GPT-4 model
             messages=messages
         )
     except Exception as e:

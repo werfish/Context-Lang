@@ -1,1 +1,36 @@
-This file contains the global context about the project.
+#<context:PROJECT_DESCRIPTION>
+A FastAPI-based application designed to accept calculation jobs for Bollinger Bands on a 1-second timeframe for the BTC/USDT pair. Users can submit and edit fake limit orders. The architecture is based on Domain-Driven Design, with separate components for managing endpoints, database interactions, data models, Binance integration, and messaging queues.
+#<context:PROJECT_DESCRIPTION/>
+
+#<context:LIBRARIES>
+FastAPI: A modern, fast (high-performance), web framework for building APIs with Python 3.7+.
+SQLAlchemy: The Python SQL toolkit and Object-Relational Mapping (ORM) library.
+Pydantic: Data validation and settings management using Python type annotations.
+Tenacity: A retrying library for Python, simplifying the task of adding retry behavior.
+Requests: A simple, yet elegant HTTP library for Python, built for human beings.
+Standard Logger: Utilized for application logging, ensuring transparent and efficient logging practices.
+#<context:LIBRARIES/>
+
+#<context:TOOLS>
+Git: The distributed version control system.
+Pre-commit: A framework for managing and maintaining multi-language pre-commit hooks, including black for Python and eslint for JavaScript.
+#<context:TOOLS/>
+
+#<context:INFRASTRUCTURE>
+Docker: To containerize the application and its components.
+RabbitMQ: For handling message queuing.
+PostgreSQL: As the primary database for storing application data.
+Redis: Used for caching and as a message broker.
+#<context:INFRASTRUCTURE/>
+
+#<context:INTEGRATIONS_3RD_PARTY>
+Binance: For retrieving live cryptocurrency data, specifically BTC/USDT pair prices on a 1-second timeframe. Binance's API is used for this purpose, with the integration requiring no API key for public data access.
+#<context:INTEGRATIONS_3RD_PARTY/>
+
+#<context:ARCHITECTURE>
+Domain-Driven Design: The project is structured around Domain-Driven Design principles, separating concerns into distinct layers - endpoints and main FastAPI setup, database interactions, SQLAlchemy models, Pydantic models for data validation, Binance integration for live data fetching, a scanner for 1-second price updates, Redis operations for caching, and RabbitMQ for message queuing.
+#<context:ARCHITECTURE/>
+
+#<context:TESTING_STRATEGY>
+Postman and Manual QA: The primary methods for testing the API will involve using Postman for API endpoint testing and manual QA practices for ensuring the functionality meets the project requirements.
+#<context:TESTING_STRATEGY/>

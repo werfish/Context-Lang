@@ -1,0 +1,43 @@
+This file contains the context for the apps data model
+
+#<context:CALCULATION_JOB_MODEL>
+Entity: CalculationJob
+Description: Represents a job submitted for calculating Bollinger Bands.
+Fields:
+  - job_id: UUID (Primary Key)
+  - start_time: DateTime
+  - end_time: DateTime
+  - period: Integer
+  - standard_deviation_multiplier: Float
+  - status: Enum ("pending", "processing", "completed", "failed")
+  - created_at: DateTime
+  - updated_at: DateTime
+Relationships: One-To-Many (One CalculationJob can have many CalculationResults)
+#<context:CALCULATION_JOB_MODEL/>
+
+#<context:CALCULATION_RESULT_MODEL>
+Entity: CalculationResult
+Description: Stores the results of Bollinger Bands calculations.
+Fields:
+  - result_id: UUID (Primary Key)
+  - job_id: UUID (Foreign Key, references CalculationJob)
+  - upper_band: JSON
+  - middle_band: JSON
+  - lower_band: JSON
+  - calculated_at: DateTime
+Relationships: Many-To-One (Many CalculationResults belong to one CalculationJob)
+#<context:CALCULATION_RESULT_MODEL/>
+
+#<context:FAKE_LIMIT_ORDER_MODEL>
+Entity: FakeLimitOrder
+Description: Represents a fake limit order for BTC/USDT.
+Fields:
+  - order_id: UUID (Primary Key)
+  - type: String ("limit")
+  - price: Decimal
+  - quantity: Decimal
+  - direction: Enum ("buy", "sell")
+  - status: Enum ("open", "cancelled", "executed")
+  - created_at: DateTime
+  - updated_at: DateTime
+#<context:FAKE_LIMIT_ORDER_MODEL/>

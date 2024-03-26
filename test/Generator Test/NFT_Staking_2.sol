@@ -19,8 +19,6 @@
 //<prompt:MAIN>
 // I want a second admin function.
 // I want an admin function to allow me to change the reward reduction.
-// YOUR CODE WILL BE PASTERD DIRECTLY BETWEEN MAIN tags, Please return the new functions
-// only without any other code.
 // {REQ}
 // {CODE}
 //<prompt:MAIN/>
@@ -34,7 +32,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NFTStaking is ReentrancyGuard, Ownable {
+contract NFT_Staking_2 is ReentrancyGuard, Ownable {
     IERC721 public immutable nftToken;
     IERC20 public immutable rewardToken;
     
@@ -144,8 +142,9 @@ contract NFTStaking is ReentrancyGuard, Ownable {
 
     //<MAIN>
     // Function to allow the owner to change the reward reduction rate
-    function setRewardReductionPerDay(uint256 _newRewardReduction) public onlyOwner {
-        require(_newRewardReduction >= 0 && _newRewardReduction <= 100, "Invalid reward reduction per day");
+    function setRewardReduction(uint256 _newRewardReduction) public onlyOwner {
+        require(_newRewardReduction >= 0 && _newRewardReduction <= 100, "Invalid reward reduction rate");
+        // Update the reduction rate. We use require to ensure the reward reduction is within acceptable bounds to avoid unintentional high reduction rates
         REWARD_REDUCTION_PER_DAY = _newRewardReduction;
     }
     //<MAIN/>

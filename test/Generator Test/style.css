@@ -15,4 +15,38 @@ Please write me the style.css file for the html code provided.
 <prompt:Main/> */
 
 /*<Main>*/
+/* Style for the navbar */
+.navbar {
+  background-color: darkblue; /* Navbar color set to dark blue */
+  color: white;               /* Text color inside navbar set to white */
+  height: 20px;               /* Navbar height set to 20px */
+  line-height: 20px;          /* Centering text vertically */
+  position: fixed;            /* Make navbar stick to the top of the page */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Style for navbar elements to be aligned to the right */
+.navbar-elements {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 10px; /* Margin on the right for some spacing */
+}
+
+/* Style for buttons inside the navbar and other places */
+.button {
+  background-color: orange; /* Button color set to orange */
+  color: black;            /* Button text color set to black */
+  font-weight: bold;       /* Button text is bold */
+  cursor: pointer;         /* Change mouse cursor to pointer when over button */
+  transition: transform 0.3s ease, background-color 0.3s ease; /* Transition effect for smooth hover animation */
+}
+
+/* Hover effect for buttons */
+.button:hover {
+  background-color: #e69500; /* Darken the button color a bit when hovered */
+  transform: scale(1.05);    /* Make the button scale up slightly */
+}
 /*<Main/>*/

@@ -39,7 +39,7 @@ def __single_file_flow(task):
         final_prompt = __process_prompt(prompt, task)
 
         # Generate the output
-        response = generate_code_with_chat(final_prompt)
+        response = generate_code_with_chat(final_prompt,prompt_name)
 
         # Parse the response JSON
         response_json = json.loads(response)

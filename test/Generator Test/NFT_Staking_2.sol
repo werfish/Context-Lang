@@ -24,6 +24,7 @@
 //<prompt:MAIN/>
 
 //<context:CODE>
+//<MAIN>
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -139,14 +140,13 @@ contract NFT_Staking_2 is ReentrancyGuard, Ownable {
         dailyReward = _newDailyReward;
         emit DailyRewardChanged(_newDailyReward);
     }
-
-    //<MAIN>
     // Function to allow the owner to change the reward reduction rate
     function setRewardReduction(uint256 _newRewardReduction) public onlyOwner {
         require(_newRewardReduction >= 0 && _newRewardReduction <= 100, "Invalid reward reduction rate");
         // Update the reduction rate. We use require to ensure the reward reduction is within acceptable bounds to avoid unintentional high reduction rates
         REWARD_REDUCTION_PER_DAY = _newRewardReduction;
     }
-    //<MAIN/>
+    
 }
+//<MAIN/>
 //<context:CODE/>

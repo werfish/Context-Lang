@@ -13,5 +13,26 @@
 
 # <context:DB_PY>
 # <CreateDatabaseConnection>
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+import os
+from . import models # Import your models where your SQLAlchemy ORM tables are defined
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/dbname")
+
+# Create an engine instance
+engine = create_engine(DATABASE_URL)
+
+# Create a SessionLocal class
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create a base class for your models
+Base = declarative_base()
+
+# Function to create tables if they don't exist
+def create_tables():
+    if not engine.dialect.has_table(engine, 'table_name'):  # Replace 'table_name' with your table name
+        Base.metadata.create_all(bind=engine)
 # <CreateDatabaseConnection/>
 # <context:DB_PY/>

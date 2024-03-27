@@ -1,5 +1,6 @@
 @echo off
-SET PROJECT_DIR="C:\Users\Robert\Desktop\PROJECTS\AI PROJECTS\Context\Context\test\Generator Test\API_TEST"
+@SET PROJECT_DIR="C:\Users\Robert\Desktop\PROJECTS\AI PROJECTS\Context\Context\test\Generator Test\API_TEST"
+SET PROJECT_DIR="C:\Users\werfi\Desktop\My Projects\Context-Lang\test\Generator Test\API_TEST"
 echo Starting automatic Context generation...
 
 REM Create the database connection setup

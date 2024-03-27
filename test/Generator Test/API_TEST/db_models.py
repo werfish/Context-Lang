@@ -9,58 +9,70 @@
 # database setup is in db.py file.
 # {PROJECT_DESCRIPTION} 
 # {LIBRARIES} 
+# {CreateDatabaseConnection}
 # {DB.PY}
 # <prompt:GenerateORMModels/>
 
 # <context:DB_MODELS_PY>
 # <GenerateORMModels>
-# {DB.PY}
-
-from sqlalchemy import Column, ForeignKey, Integer, Float, String, DateTime, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, Float, String, create_engine, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
+from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.future import select
 
-# Create the base class from which all mapped classes should inherit
+# Assuming you have a config file or environment variable management for the DB URI.
+# from config import SQLALCHEMY_DATABASE_URI
+DATABASE_URI = "sqlite:///./test.db"  # Placeholder, replace with actual DB URI
+
 Base = declarative_base()
 
+# Database connection setup
+engine = create_engine(DATABASE_URI, echo=True, future=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Models
 class CalculationJob(Base):
     __tablename__ = 'calculation_jobs'
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    pair = Column(String, index=True, nullable=False, default='BTC/USDT')
-    timeframe = Column(String, default='1S')  # 1-second timeframe
-    submitted_at = Column(DateTime, default=datetime.utcnow)
-    status = Column(String, index=True, default='submitted') # Possible statuses: submitted, processing, completed, failed
-    results = relationship("CalculationResult", back_populates="job")  # One-to-Many relationship
+    status = Column(String, default="pending")
+    btc_usdt_pair = Column(String, index=True)
+    # additional fields as necessary
+    
+    # Relationship to calculate results
+    results = relationship("CalculationResult", back_populates="job")
 
 class CalculationResult(Base):
     __tablename__ = 'calculation_results'
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    job_id = Column(Integer, ForeignKey('calculation_jobs.id'), index=True)
-    calculated_at = Column(DateTime, default=datetime.utcnow)
-    upper_band = Column(Float)
-    lower_band = Column(Float)
-    moving_average = Column(Float)
-    job = relationship("CalculationJob", back_populates="results")  # Many-to-One relationship
-
+    job_id = Column(Integer, ForeignKey('calculation_jobs.id'))
+    value = Column(Float)  # Change to appropriate field type
+    # additional fields as necessary
+    
+    # Relationship to calculation jobs
+    job = relationship("CalculationJob", back_populates="results")
+    
 class FakeLimitOrder(Base):
     __tablename__ = 'fake_limit_orders'
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), index=True)  # Assuming there is a users table
-    pair = Column(String, nullable=False)
-    price = Column(Float, nullable=False)
-    amount = Column(Float, nullable=False)
-    side = Column(String, default='buy')  # 'buy' or 'sell'
-    created_at = Column(DateTime, default=datetime.utcnow)
-    is_active = Column(Boolean, default=True)
+    user_id = Column(Integer)  # or a ForeignKey to a User model, if exists
+    price = Column(Float)
+    amount = Column(Float)
+    side = Column(String)
+    # additional fields as necessary
 
-# This function can be used to create all tables in the database
-def create_all_tables(engine):
-    Base.metadata.create_all(engine)
+# Create the database tables
+Base.metadata.create_all(bind=engine)
 
-# Other database setup code, such as engine creation, session management, etc., should also be included here.
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 # <GenerateORMModels/>
 # <context:DB_MODELS_PY/>

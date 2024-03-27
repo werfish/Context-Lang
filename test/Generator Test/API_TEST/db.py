@@ -14,39 +14,53 @@
 # <context:DB.PY>
 # <CreateDatabaseConnection>
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy_utils import database_exists, create_database
+from sqlalchemy.exc import ProgrammingError
 import os
 
-# Define the database URL from environment variables
-DATABASE_URL = (
-    f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASS']}"
-    f"@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
+# Define the base for our models
+Base = declarative_base()
+
+# Retrieve the database connection variables from the environment
+DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_PORT = os.environ.get('DATABASE_PORT')
+DATABASE_USER = os.environ.get('DATABASE_USER')
+DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')
+DATABASE_NAME = os.environ.get('DATABASE_NAME')
+
+# Construct the PostgreSQL connection string
+SQLALCHEMY_DATABASE_URI = (
+    f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}"
+    f"@{DATABASE_URL}:{DATABASE_PORT}/{DATABASE_NAME}"
 )
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
-# Create a scoped session factory
-SessionLocal = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+# Create a SessionLocal class which will serve as a factory for new Session objects
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Declare the Base class for declarative table definitions
-Base = declarative_base()
 
 def check_and_create_tables():
     """
-    Check if any tables are created, if not creates the tables.
-    Run this function in main.py on startup.
+    Function that checks if the tables are created and creates them if not.
+
+    It uses the SQLAlchemy Base metadata to reflect and create the tables in
+    the database.
     """
-    if not database_exists(engine.url):
-        create_database(engine.url)
-    
-    # Check for tables and create if they're not existing
-    if not engine.dialect.has_table(engine, 'example_table'):  # Replace 'example_table' with a relevant table name
-        Base.metadata.create_all(bind=engine)
-        print("Tables created.")
-    else:
-        print("Tables already exist, skipping creation.")
+    try:
+        # Check for existing tables
+        if not engine.dialect.has_table(engine, 'some_table_name'):  # Replace 'some_table_name' with an actual table name
+            # Create tables if they don't exist
+            Base.metadata.create_all(bind=engine)
+            print("Tables created successfully.")
+        else:
+            print("Tables already exist.")
+    except ProgrammingError:
+        print("An error occurred while checking for tables.")
+
+# Note: You need to ensure that the table name passed to has_table is accurate,
+# and that you have defined your SQLAlchemy models with Base before calling check_and_create_tables.
 # <CreateDatabaseConnection/>
 # <context:DB.PY/>

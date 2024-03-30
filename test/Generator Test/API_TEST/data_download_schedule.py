@@ -3,11 +3,12 @@
 # <import:DB_MODELS_PY>db_models.py<import:DB_MODELS_PY/>
 # <import:QUERIES_PY>queries.py<import:QUERIES_PY/>
 # <import:BinanceIntegration>binance.py<import:BinanceIntegration/>
+# <import:DB_PY>db.py<import:DB_PY/>
 
 # <context:DATA_PROCESS_REQUIREMENTS>
 # Requirements for this codefile (data_download_schedule.py) are as follows:
 # 1. Create a function that downloads the current price of the pair mentioned in the manifest file
-# from binance by using the Binance Integration class provided.
+# from binance by using the Binance Integration class provided from the binance.py file.
 # 2. The function should store the price in the database using the ORM queries provided
 # according to the data model provided in the DataModelReqs file.
 # 3. The function should be scheduled to run every 1 second, at an exact second boundary.
@@ -21,8 +22,11 @@
 # Please write the code according to the data process requirements.
 # For context you get the MANIFEST with high level project description,
 # the db models file, the queries file and the binance integration file.
+# Remember that this file needs to be run with "PYTHON data_download_schedule.py"
+# project filenames are listed in the manifest.
 # {MANIFEST}
 # {DB_MODELS_PY}
+# {DB_PY}
 # {QUERIES_PY}
 # {BinanceIntegration}
 # {DATA_PROCESS_REQUIREMENTS}
@@ -30,58 +34,76 @@
 
 # <context:DataProcess>
 # <CreateDataProcess>
-import time
+from datetime import datetime
 import schedule
-import logging
+import time
+from threading import Event
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from db_models import PriceData, Base
 from binance import BinanceIntegration
-from queries import create_fake_limit_order  # Assuming 'queries' is the module name where ORM queries are present.
-from db import SessionLocal  # Assuming 'db' is the module name for database session management.
-import sys
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Import necessary components to establish a connection to the database
+from db import DATABASE_URL, SessionLocal
 
-# Initialize Binance integration
+# Setup Binance Integration
 binance_integration = BinanceIntegration()
 
-def download_and_store_price():
-    "/**Function to download BTC/USDT price and store in the database.*/"
-    
-    # Download the current price
-    current_price_data = binance_integration.fetch_current_price('BTCUSDT')
-    
-    # Check for errors in fetching data
-    if isinstance(current_price_data, str):
-        logging.error(f"Failed to fetch current price: {current_price_data}")
-        return
-    
-    # Store the price in database
-    db = SessionLocal()
-    try:
-        # Note: Here we are assuming a quantity of 1 for the purpose of storing the price.
-        order = create_fake_limit_order(db=db, price=current_price_data['price'], quantity=1, direction='buy')  
-        logging.info(f"Stored current price in database: {order.price}")
-    except Exception as error:
-        logging.error(f"Error storing price in database: {error}")
-    finally:
-        db.close()
+# Create database connection
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
+session = Session()
 
-def run_scheduled_job():
-    "/**Scheduler running every second to download and store price.*/"
-    # Scheduling the task to run every second
-    schedule.every(1).seconds.do(download_and_store_price)
+# Define the scheduled function
+def fetch_and_store_price():
+    # Fetch current BTC/USDT price using BinanceIntegration
+    current_price = binance_integration.get_current_price()
+    print(current_price)
+    
+    # Store the price in the database
+    price_data = PriceData(price=current_price, timestamp=datetime.utcnow())
+    session.add(price_data)
+    session.commit()
 
-    # Run scheduled jobs
-    while True:
+# Schedule the function to run every second at an exact second boundary
+schedule.every(1).seconds.do(fetch_and_store_price)
+
+# Graceful shutdown event
+shutdown_event = Event()
+
+def run_continuously(interval=1):
+    """
+    Continuously run, while waiting for schedule to run jobs at each elapsed interval.
+    """
+    cease_continuous_run = shutdown_event.wait(interval)
+    while not cease_continuous_run:
         schedule.run_pending()
-        time.sleep(1)
+        cease_continuous_run = shutdown_event.wait(interval)
 
-if __name__ == "__main__":
-    logging.info("Starting the data download schedule process...")
-    try:
-        run_scheduled_job()
-    except KeyboardInterrupt:
-        logging.info("Data download schedule process interrupted and is now shutting down gracefully.")
-        sys.exit()
+def graceful_shutdown(signum, frame):
+    """
+    Triggered when a signal is received, stops new scheduling and waits for jobs to finish.
+    """
+    print(f"Received exit signal: {signum}, shutting down gracefully...")
+    shutdown_event.set()
+
+# Listen for keyboard interrupt (SIGINT)
+try:
+    # Start the background thread
+    import threading
+    continuous_thread = threading.Thread(target=run_continuously)
+    continuous_thread.start()
+    
+    # Keep the script running
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    print("Process interrupted by the user, stopping schedule...")
+    shutdown_event.set()
+
+# Wait for the last jobs to complete before exiting
+continuous_thread.join()
+
+print("Scheduler shutdown successfully, exiting now.")
 # <CreateDataProcess/>
 # <context:DataProcess/>

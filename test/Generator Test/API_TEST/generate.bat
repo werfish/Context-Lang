@@ -3,33 +3,33 @@ SET "PROJECT_DIR=%CD%"
 
 echo Starting automatic Context generation...
 
-@REM REM Create the database connection setup
-@REM echo Generating database connection setup...
-@REM context --debug --log --filepath "%PROJECT_DIR%\db.py"
+REM Create the database connection setup
+echo Generating database connection setup...
+context --debug --log --filepath "%PROJECT_DIR%\db.py"
 
-@REM REM Generate the SQLAlchemy database models first
-@REM echo Generating database models...
-@REM context --debug --log --filepath "%PROJECT_DIR%\db_models.py"
+REM Generate the SQLAlchemy database models first
+echo Generating database models...
+context --debug --log --filepath "%PROJECT_DIR%\db_models.py"
 
-@REM REM Generate ORM queries
-@REM echo Generating ORM queries...
-@REM context --debug --log --filepath "%PROJECT_DIR%\queries.py"
+REM Generate ORM queries
+echo Generating ORM queries...
+context --debug --log --filepath "%PROJECT_DIR%\queries.py"
 
-@REM REM generate the integration with Binance
-@REM echo Generating Binance Integration...
-@REM context --debug --log --filepath "%PROJECT_DIR%\binance.py"
+REM generate the integration with Binance
+echo Generating Binance Integration...
+context --debug --log --filepath "%PROJECT_DIR%\binance.py"
 
-@REM REM generate download schedule data process
-@REM echo Generating Binance Data Download Schedule...
-@REM context --debug --log --filepath "%PROJECT_DIR%\data_download_schedule.py"
+REM generate download schedule data process
+echo Generating Binance Data Download Schedule...
+context --debug --log --filepath "%PROJECT_DIR%\data_download_schedule.py"
 
-@REM REM generate the pydantic models
-@REM echo Generating Pydantic Models...
-@REM context --debug --log --filepath "%PROJECT_DIR%\pydantic_models.py"
+REM generate the pydantic models
+echo Generating Pydantic Models...
+context --debug --log --filepath "%PROJECT_DIR%\pydantic_models.py"
 
-@REM REM Finally, generate the endpoints that depend on everything else
-@REM echo Generating FastAPI endpoints...
-@REM context --debug --log --filepath "%PROJECT_DIR%\main.py"
+REM Finally, generate the endpoints that depend on everything else
+echo Generating FastAPI endpoints...
+context --debug --log --filepath "%PROJECT_DIR%\main.py"
 
 echo Context generation process completed.
 
@@ -37,7 +37,14 @@ echo Generating requirements.txt using pipreqs...
 pipreqs "%PROJECT_DIR%" --force
 
 echo Adding dependencies to Poetry...
-FOR /F "usebackq delims=" %%i IN (`type "%PROJECT_DIR%\requirements.txt"`) DO call poetry add "%%i"
+FOR /F "usebackq delims=" %%i IN (`type "%PROJECT_DIR%\requirements.txt"`) DO (
+    IF NOT "%%i"=="pydantic" (
+        call poetry add "%%i"
+    )
+)
+
+echo Adding Uvicorn to Poetry...
+call poetry add uvicorn
 
 echo Running main.py with Poetry...
 poetry run python main.py

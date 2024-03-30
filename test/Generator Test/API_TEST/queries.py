@@ -23,103 +23,117 @@
 
 #<context:QUERIES_PY>
 #<GenerateAllORMQueries>
+# Import the required modules from the SQLAlchemy ORM and the models from db_models.py
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from db_models import CalculationJob, CalculationResult, FakeLimitOrder, JobStatus, OrderDirection, OrderStatus
-from typing import List, Optional
-from uuid import UUID
-import datetime
+from db_models import FakeLimitOrderDirection, FakeLimitOrderStatus, CalculationJobStatus, CalculationJob, CalculationResult, FakeLimitOrder, PriceData
+from datetime import datetime
 
+class DatabaseManager:
+    def __init__(self, session: Session):
+        self.session = session
 
-# CalculationJob Operations
+    def get_price_data_for_period(self, start_time: datetime, end_time: datetime, period: int = None):
+        query = self.session.query(PriceData.price).\
+                filter(PriceData.timestamp >= start_time, PriceData.timestamp <= end_time).\
+                order_by(PriceData.timestamp.asc())
+        
+        if period:
+            # If a period is specified, you may choose to fetch only the last 'period' number of records
+            # This is an example and might need adjustment based on your specific requirements
+            total_records = query.count()
+            if total_records > period:
+                query = query.offset(total_records - period)
 
-def create_calculation_job(db: Session, start_time: datetime.datetime, end_time: datetime.datetime, period: int, std_multiplier: float) -> CalculationJob:
-    job = CalculationJob(
-        start_time=start_time, 
-        end_time=end_time, 
-        period=period, 
-        standard_deviation_multiplier=std_multiplier,
-        status=JobStatus.pending,
-        created_at=datetime.datetime.utcnow(),
-        updated_at=datetime.datetime.utcnow()
-    )
-    db.add(job)
-    db.commit()
-    db.refresh(job)
-    return job
+        return query.all()
 
-def get_calculation_job(db: Session, job_id: UUID) -> CalculationJob:
-    return db.query(CalculationJob).filter(CalculationJob.job_id == job_id).first()
+    # Create a new CalculationJob instance and add it to the database.
+    def create_calculation_job(self, start_time: datetime, end_time: datetime, period: int, standard_deviation_multiplier: float):
+        job = CalculationJob(
+            start_time=start_time,
+            end_time=end_time,
+            period=period,
+            standard_deviation_multiplier=standard_deviation_multiplier,
+            status=CalculationJobStatus.pending,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        self.session.add(job)
+        self.session.commit()
+        return job
 
-def update_calculation_job(db: Session, job_id: UUID, status: JobStatus) -> CalculationJob:
-    job = db.query(CalculationJob).filter(CalculationJob.job_id == job_id).first()
-    if job:
-        job.status = status
-        job.updated_at = datetime.datetime.utcnow()
-        db.commit()
-        db.refresh(job)
-    return job
+    # Fetch an existing CalculationJob by ID or other criteria.
+    def get_calculation_job_by_id(self, job_id: str):
+        return self.session.query(CalculationJob).filter_by(job_id=job_id).first()
 
-def delete_calculation_job(db: Session, job_id: UUID) -> None:
-    db.query(CalculationJob).filter(CalculationJob.job_id == job_id).delete()
-    db.commit()
+    # Update CalculationJob details in the database.
+    def update_calculation_job(self, job_id: str, **kwargs):
+        job = self.get_calculation_job_by_id(job_id)
+        if job:
+            for key, value in kwargs.items():
+                setattr(job, key, value)
+            job.updated_at = datetime.utcnow()
+            self.session.commit()
+            return True
+        return False
 
+    # Create a new CalculationResult instance and associate it with a CalculationJob.
+    def create_calculation_result(self, job_id: str, upper_band, middle_band, lower_band):
+        result = CalculationResult(
+            job_id=job_id,
+            upper_band=upper_band,
+            middle_band=middle_band,
+            lower_band=lower_band,
+            calculated_at=datetime.utcnow()
+        )
+        self.session.add(result)
+        self.session.commit()
+        return result.result_id
 
-# CalculationResult Operations
+    # Create a new FakeLimitOrder instance and add it to the database.
+    def create_fake_limit_order(self, price: float, quantity: float, direction: FakeLimitOrderDirection):
+        order = FakeLimitOrder(
+            price=price,
+            quantity=quantity,
+            direction=direction,
+            status=FakeLimitOrderStatus.open,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        self.session.add(order)
+        self.session.commit()
+        return order
 
-def create_calculation_result(db: Session, job_id: UUID, upper_band: List, middle_band: List, lower_band: List) -> CalculationResult:
-    result = CalculationResult(
-        job_id=job_id, 
-        upper_band=upper_band, 
-        middle_band=middle_band, 
-        lower_band=lower_band,
-        calculated_at=datetime.datetime.utcnow()
-    )
-    db.add(result)
-    db.commit()
-    db.refresh(result)
-    return result
+    # Fetch an existing FakeLimitOrder by ID or other criteria.
+    def get_fake_limit_order_by_id(self, order_id: str):
+        return self.session.query(FakeLimitOrder).filter_by(order_id=order_id).first()
 
-def get_calculation_result(db: Session, job_id: UUID) -> CalculationResult:
-    return db.query(CalculationResult).filter(CalculationResult.job_id == job_id).first()
+    # Update FakeLimitOrder details in the database.
+    def update_fake_limit_order(self, order_id: str, **kwargs):
+        order = self.get_fake_limit_order_by_id(order_id)
+        if order:
+            for key, value in kwargs.items():
+                setattr(order, key, value)
+            order.updated_at = datetime.utcnow()
+            self.session.commit()
+            return True
+        return False
 
+    # Delete an existing FakeLimitOrder from the database.
+    def delete_fake_limit_order(self, order_id: str):
+        order = self.get_fake_limit_order_by_id(order_id)
+        if order:
+            self.session.delete(order)
+            self.session.commit()
+            return True
+        return False
 
-# FakeLimitOrder Operations
+    # Retrieve a list of all FakeLimitOrders.
+    def list_all_fake_limit_orders(self):
+        return self.session.query(FakeLimitOrder).all()
 
-def create_fake_limit_order(db: Session, price: float, quantity: float, direction: OrderDirection) -> FakeLimitOrder:
-    order = FakeLimitOrder(
-        price=price, 
-        quantity=quantity, 
-        direction=direction, 
-        status=OrderStatus.open,
-        created_at=datetime.datetime.utcnow(),
-        updated_at=datetime.datetime.utcnow()
-    )
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-    return order
-
-def get_fake_limit_order(db: Session, order_id: UUID) -> FakeLimitOrder:
-    return db.query(FakeLimitOrder).filter(FakeLimitOrder.order_id == order_id).first()
-
-def update_fake_limit_order(db: Session, order_id: UUID, price: Optional[float], quantity: Optional[float]) -> FakeLimitOrder:
-    order = db.query(FakeLimitOrder).filter(FakeLimitOrder.order_id == order_id).first()
-    if order:
-        if price is not None:
-            order.price = price
-        if quantity is not None:
-            order.quantity = quantity
-        order.updated_at = datetime.datetime.utcnow()
-        db.commit()
-        db.refresh(order)
-    return order
-
-def delete_fake_limit_order(db: Session, order_id: UUID) -> None:
-    db.query(FakeLimitOrder).filter(FakeLimitOrder.order_id == order_id).delete()
-    db.commit()
-
-def list_all_fake_limit_orders(db: Session) -> List[FakeLimitOrder]:
-    return db.query(FakeLimitOrder).all()
+# Note: Make sure to pass an active database session to the DatabaseManager class instance.
+# Example usage:
+# db_manager = DatabaseManager(session)
+# job_id = db_manager.create_calculation_job(...)
 #<GenerateAllORMQueries/>
 #<context:QUERIES_PY/>

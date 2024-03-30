@@ -17,82 +17,75 @@
 
 # <context:DB_MODELS_PY>
 # <GenerateORMModels>
-from sqlalchemy import Column, String, DateTime, Float, Integer, ForeignKey, Enum, JSON, DECIMAL
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column,Integer, DateTime, Enum, Float, ForeignKey, JSON, String
+from sqlalchemy.dialects.sqlite import DECIMAL
 from sqlalchemy.orm import relationship
+from uuid import uuid4
 import enum
-from db import Base  # Import the base class for the ORM
-import uuid
+from db import Base, create_database
 
-# Enum for the job status
-class JobStatus(enum.Enum):
-    pending = "pending"
-    processing = "processing"
-    completed = "completed"
-    failed = "failed"
+# Enums for status fields
+class CalculationJobStatus(enum.Enum):
+    pending = 'pending'
+    processing = 'processing'
+    completed = 'completed'
+    failed = 'failed'
 
-# Enum for the fake limit order status
-class OrderStatus(enum.Enum):
-    open = "open"
-    cancelled = "cancelled"
-    executed = "executed"
+class FakeLimitOrderStatus(enum.Enum):
+    open = 'open'
+    cancelled = 'cancelled'
+    executed = 'executed'
 
-# Enum for the fake limit order direction
-class OrderDirection(enum.Enum):
-    buy = "buy"
-    sell = "sell"
+class FakeLimitOrderDirection(enum.Enum):
+    buy = 'buy'
+    sell = 'sell'
 
-# CalculationJob model
 class CalculationJob(Base):
     __tablename__ = 'calculation_jobs'
-    
-    # Fields
-    job_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    job_id = Column(String, primary_key=True, default=lambda: str(uuid4()))
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     period = Column(Integer)
     standard_deviation_multiplier = Column(Float)
-    status = Column(Enum(JobStatus))
+    status = Column(Enum(CalculationJobStatus))
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     
-    # Relationships
-    calculation_results = relationship('CalculationResult', back_populates='calculation_job')
-
-# CalculationResult model
+    # Relationship to CalculationResult
+    results = relationship("CalculationResult", back_populates="job")
+    
 class CalculationResult(Base):
     __tablename__ = 'calculation_results'
-    
-    # Fields
-    result_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    job_id = Column(UUID(as_uuid=True), ForeignKey('calculation_jobs.job_id'))
+    result_id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    job_id = Column(String, ForeignKey('calculation_jobs.job_id'))
     upper_band = Column(JSON)
     middle_band = Column(JSON)
     lower_band = Column(JSON)
     calculated_at = Column(DateTime)
     
-    # Relationships
-    calculation_job = relationship('CalculationJob', back_populates='calculation_results')
+    # Relationship to CalculationJob
+    job = relationship("CalculationJob", back_populates="results")
 
-# FakeLimitOrder model
 class FakeLimitOrder(Base):
     __tablename__ = 'fake_limit_orders'
-    
-    # Fields
-    order_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    type = Column(String, default="limit")
+    order_id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    type = Column(String, default='limit')
     price = Column(DECIMAL)
     quantity = Column(DECIMAL)
-    direction = Column(Enum(OrderDirection))
-    status = Column(Enum(OrderStatus))
+    direction = Column(Enum(FakeLimitOrderDirection))
+    status = Column(Enum(FakeLimitOrderStatus))
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
 
-# this will be executed to create the database tables
-def create_tables():
-    from db import init_db
-    init_db()
+# Uncomment and use the following class if storing price data is required for your application.
+class PriceData(Base):
+    __tablename__ = 'price_data'
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    timestamp = Column(DateTime)
+    price = Column(DECIMAL)
+    volume = Column(DECIMAL, nullable=True)
 
-create_tables()
+# Ensure the database and tables are created after defining the models.
+create_database()
 # <GenerateORMModels/>
 # <context:DB_MODELS_PY/>

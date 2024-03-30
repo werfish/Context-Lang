@@ -14,30 +14,29 @@
 
 # <context:PydanticModels>
 # <CreatePydanticModels>
-# pydantic_models.py
-from pydantic import BaseModel, UUID4, condecimal
+from pydantic import BaseModel, condecimal, UUID4
 from datetime import datetime
-from typing import Optional, Dict
 from enum import Enum
+from typing import List, Optional
 
-# Enums used for Pydantic validation
-class JobStatus(str, Enum):
-    pending = "pending"
-    processing = "processing"
-    completed = "completed"
-    failed = "failed"
+# Enums for the statuses similar to the ones in the database model
+class CalculationJobStatus(str, Enum):
+    pending = 'pending'
+    processing = 'processing'
+    completed = 'completed'
+    failed = 'failed'
 
-class OrderStatus(str, Enum):
-    open = "open"
-    cancelled = "cancelled"
-    executed = "executed"
+class FakeLimitOrderStatus(str, Enum):
+    open = 'open'
+    cancelled = 'cancelled'
+    executed = 'executed'
 
-class OrderDirection(str, Enum):
-    buy = "buy"
-    sell = "sell"
+class FakeLimitOrderDirection(str, Enum):
+    buy = 'buy'
+    sell = 'sell'
 
-# Pydantic models for CalculationJob
-class CalculationJobInput(BaseModel):
+# Pydantic models for each database model
+class CalculationJobCreate(BaseModel):
     start_time: datetime
     end_time: datetime
     period: int
@@ -47,35 +46,43 @@ class CalculationJobOutput(BaseModel):
     job_id: UUID4
     start_time: datetime
     end_time: datetime
-    status: JobStatus
     period: int
     standard_deviation_multiplier: float
+    status: CalculationJobStatus
     created_at: datetime
     updated_at: datetime
 
-# Pydantic models for CalculationResult
 class CalculationResultOutput(BaseModel):
     result_id: UUID4
     job_id: UUID4
-    upper_band: Dict[str, float]
-    middle_band: Dict[str, float]
-    lower_band: Dict[str, float]
+    upper_band: dict
+    middle_band: dict
+    lower_band: dict
     calculated_at: datetime
 
-# Pydantic models for FakeLimitOrder
-class FakeLimitOrderInput(BaseModel):
-    price: condecimal(decimal_places=2)  # Precision based on USD amount in crypto
-    quantity: condecimal(decimal_places=8)  # Precision based on crypto amount
-    direction: OrderDirection
+class CalculationJobDetailOutput(CalculationJobOutput):
+    results: List[CalculationResultOutput]
+
+class FakeLimitOrderCreate(BaseModel):
+    price: condecimal(decimal_places=2)
+    quantity: condecimal(decimal_places=2)
+    direction: FakeLimitOrderDirection
 
 class FakeLimitOrderOutput(BaseModel):
     order_id: UUID4
     type: str
     price: condecimal(decimal_places=2)
-    quantity: condecimal(decimal_places=8)
-    direction: OrderDirection
-    status: OrderStatus
+    quantity: condecimal(decimal_places=2)
+    direction: FakeLimitOrderDirection
+    status: FakeLimitOrderStatus
     created_at: datetime
     updated_at: datetime
+
+# Pydantic models for PriceData if it is ever needed for inputs or outputs
+class PriceDataOutput(BaseModel):
+    id: UUID4
+    timestamp: datetime
+    price: condecimal(decimal_places=2)
+    volume: Optional[condecimal(decimal_places=2)]
 # <CreatePydanticModels/>
 # <context:PydanticModels/>

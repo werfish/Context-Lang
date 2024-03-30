@@ -1,5 +1,7 @@
 #<context:PROJECT_DESCRIPTION>
-A FastAPI-based application designed to accept calculation jobs for Bollinger Bands on a 1-second timeframe for the BTC/USDT pair. Users can submit and edit fake limit orders.
+A FastAPI-based application designed to accept calculation jobs for Bollinger Bands on a 1-second timeframe for the BTC/USDT pair. 
+A scheduled process is collecting pricess every 1 second CONTINOUSLY, that the api can use to calculate for the jobs.
+Users can submit and edit fake limit orders.
 #<context:PROJECT_DESCRIPTION/>
 
 #<context:LIBRARIES>
@@ -9,6 +11,7 @@ Pydantic: Data validation and settings management using Python type annotations.
 Tenacity: A retrying library for Python, simplifying the task of adding retry behavior.
 Requests: A simple, yet elegant HTTP library for Python, built for human beings.
 Standard Logger: Utilized for application logging, ensuring transparent and efficient logging practices.
+schedule: Utilized for scheduling
 #<context:LIBRARIES/>
 
 #<context:TOOLS>

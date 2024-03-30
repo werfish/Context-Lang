@@ -19,42 +19,50 @@
 # <context:DB_PY>
 # <CreateDatabaseConnection>
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import OperationalError
 import os
 
-# DATABASE URL
+# Define the path for SQLite3 database. 
 DATABASE_URL = "sqlite:///./database.db"
+Base = declarative_base()  # The base class to create models
 
-# ENGINE CREATION
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Create an engine that the Session will use for connection resources.
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-# SESSION LOCAL DEFINITION
-# This class will allow us to create a session in each request
-SessionLocal = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=engine)
-)
+# Create a custom SessionLocal class that will establish the actual sessions later.
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# BASE CLASS FOR ORM MODELS
-Base = declarative_base()
-
-# DB INITIALIZATION FUNCTION
-def init_db():
-    # This function checks for the existence of the database and creates the tables if they do not exist.
+def create_database():
     
-    # Import all the models
-    import db_models
     
-    # Ensure the SQLite database file exists
-    if not os.path.exists("./database.db"):
-        # If not, create the SQLite file
-        open("./database.db", 'a').close()
     
-    # Create all tables in the database by using metadata
+    
+    
+    
+    
+    
+    
+    # Check for the existence of SQLite3 database file and create it if not exists
+    if not os.path.exists('./database.db'):
+        # Create the database file
+        try:
+            conn = engine.connect()
+            conn.close()
+        except OperationalError as e:
+            print(f"An error occurred while creating the database: {e}")
+    
+    # Import the models and create all tables
+    # This import must be here to avoid circular imports as it relies on the Base and engine defined above
+    from db_models import Base  # Import the Base from db_models.py
+    
+    # Use Base to create all tables in the database.
     Base.metadata.create_all(bind=engine)
 
-# The init_db function will be called inside the db_models.py once all models are defined.
+# This function must be called after defining all models in db_models.py to ensure tables creation
+
+# Don't forget to run this function in your `db_models.py` file to create/update database tables:
+# from database_setup import create_database
+# create_database()
 # <CreateDatabaseConnection/>
 # <context:DB_PY/>

@@ -21,42 +21,35 @@
 # <context:BinanceIntegration>
 # <CreateBinanceIntegration>
 import requests
-from typing import Dict, Union
-
 
 class BinanceIntegration:
-
+    """
+    Class that handles the integration with the Binance API for fetching cryptocurrency data.
+    """
+    
     def __init__(self):
-        # Binance API base URL
+        # The base URL of the Binance API
         self.base_url = "https://api.binance.com"
     
-    def fetch_current_price(self, symbol: str) -> Union[Dict[str, Union[str, float]], str]:
-        endpoint = f"{self.base_url}/api/v3/ticker/price"
-        params = {'symbol': symbol}
-        try:
-            response = requests.get(endpoint, params=params)
-            response.raise_for_status()  # Raise HTTPError for bad requests (4xx or 5xx)
-            data = response.json()
-            # Ensuring proper data format
-            if "price" in data and "symbol" in data:
-                return {
-                    "symbol": data["symbol"],
-                    "price": float(data["price"])
-                }
-            else:
-                return "Unexpected data format from Binance API."
-        except requests.exceptions.HTTPError as http_err:
-            # Log the error here
-            # logger.error(f"HTTP error occurred: {http_err}")
-            return f"HTTP error occurred: {http_err}"
-        except Exception as err:
-            # Log the error here
-            # logger.error(f"An error occurred: {err}")
-            return f"An error occurred: {err}"
+    def get_current_price(self, symbol:str = "BTCUSDT"):
+        """
+        Fetches the current price of a trading pair (default BTC/USDT).
+
+        :param symbol: The symbol of the trading pair to fetch, default is BTC/USDT.
+        :return: The current price as float or raises an exception if unable to fetch.
+        """
+        endpoint = "/api/v3/ticker/price"
+        url = f"{self.base_url}{endpoint}?symbol={symbol}"
+        response = requests.get(url)
+        response.raise_for_status() # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+        
+        # Assuming a successful response, parse the JSON and return the price
+        price_info = response.json()
+        return float(price_info['price'])
 
 # Example usage:
 # binance_integration = BinanceIntegration()
-# current_price = binance_integration.fetch_current_price("BTCUSDT")
-# print(current_price)
+# current_price = binance_integration.get_current_price()
+# print(f"Current price of BTC/USDT is: {current_price}")
 # <CreateBinanceIntegration/>
 # <context:BinanceIntegration/>

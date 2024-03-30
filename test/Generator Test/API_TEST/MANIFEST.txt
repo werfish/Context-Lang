@@ -30,6 +30,7 @@ db_models will contain SQL Alchemy models
 querries.py will contain ORM queries
 binance.py will contain the binance functions needed for the integration
 data_download_schedule.py will be a scheduled process downloading the data
+pydantic_models.py contains the pydantic models for Inputs and returns of the api
 #<context:ARCHITECTURE/>
 
 #<context:TESTING_STRATEGY>

@@ -5,31 +5,31 @@ echo Starting automatic Context generation...
 
 REM Create the database connection setup
 echo Generating database connection setup...
-context --debug --log --filepath %PROJECT_DIR%\db.py
+context --debug --log --filepath "%PROJECT_DIR%\db.py"
 
 REM Generate the SQLAlchemy database models first
 echo Generating database models...
-context --debug --log --filepath %PROJECT_DIR%\db_models.py
+context --debug --log --filepath "%PROJECT_DIR%\db_models.py"
 
 REM Generate ORM queries
 echo Generating ORM queries...
-context --debug --log --filepath %PROJECT_DIR%\queries.py
+context --debug --log --filepath "%PROJECT_DIR%\queries.py"
 
 REM generate the integration with Binance
 echo Generating Binance Integration...
-context --debug --log --filepath %PROJECT_DIR%\binance.py
+context --debug --log --filepath "%PROJECT_DIR%\binance.py"
 
 REM generate download schedule data process
 echo Generating Binance Data Download Schedule...
-context --debug --log --filepath %PROJECT_DIR%\data_download_schedule.py
+context --debug --log --filepath "%PROJECT_DIR%\data_download_schedule.py"
 
 REM generate the pydantic models
 echo Generating Pydantic Models...
-context --filepath %PROJECT_DIR%\pydantic_models.py
+context --debug --log --filepath "%PROJECT_DIR%\pydantic_models.py"
 
 REM Finally, generate the endpoints that depend on everything else
 echo Generating FastAPI endpoints...
-context --filepath %PROJECT_DIR%\main.py
+context --debug --log --filepath "%PROJECT_DIR%\main.py"
 
 echo Context generation process completed.
 

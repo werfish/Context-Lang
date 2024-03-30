@@ -1,7 +1,7 @@
 # <file:MANIFEST>MANIFEST.txt<file:MANIFEST/>
 # <file:DataModelReqs>DataModel.txt<file:DataModelReqs/>
 # <import:DB_MODELS_PY>db_models.py<import:DB_MODELS_PY/>
-# <import:QUERIES_PY>querries.py<import:QUERIES_PY/>
+# <import:QUERIES_PY>queries.py<import:QUERIES_PY/>
 # <import:BinanceIntegration>binance.py<import:BinanceIntegration/>
 
 # <context:DATA_PROCESS_REQUIREMENTS>

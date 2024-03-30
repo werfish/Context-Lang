@@ -20,5 +20,43 @@
 
 # <context:BinanceIntegration>
 # <CreateBinanceIntegration>
+import requests
+from typing import Dict, Union
+
+
+class BinanceIntegration:
+
+    def __init__(self):
+        # Binance API base URL
+        self.base_url = "https://api.binance.com"
+    
+    def fetch_current_price(self, symbol: str) -> Union[Dict[str, Union[str, float]], str]:
+        endpoint = f"{self.base_url}/api/v3/ticker/price"
+        params = {'symbol': symbol}
+        try:
+            response = requests.get(endpoint, params=params)
+            response.raise_for_status()  # Raise HTTPError for bad requests (4xx or 5xx)
+            data = response.json()
+            # Ensuring proper data format
+            if "price" in data and "symbol" in data:
+                return {
+                    "symbol": data["symbol"],
+                    "price": float(data["price"])
+                }
+            else:
+                return "Unexpected data format from Binance API."
+        except requests.exceptions.HTTPError as http_err:
+            # Log the error here
+            # logger.error(f"HTTP error occurred: {http_err}")
+            return f"HTTP error occurred: {http_err}"
+        except Exception as err:
+            # Log the error here
+            # logger.error(f"An error occurred: {err}")
+            return f"An error occurred: {err}"
+
+# Example usage:
+# binance_integration = BinanceIntegration()
+# current_price = binance_integration.fetch_current_price("BTCUSDT")
+# print(current_price)
 # <CreateBinanceIntegration/>
 # <context:BinanceIntegration/>

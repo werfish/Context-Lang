@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "api-test"
+version = "0.1.0"
+description = "This is a QA/DEMO Project for context"
+authors = ["Robert Mazurowski <werfish1@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "2.25.1"
+schedule = "1.1.0"
+sqlalchemy = "2.0.29"
+fastapi = "^0.110.0"
+uvicorn = "^0.29.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

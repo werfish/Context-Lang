@@ -2,14 +2,14 @@ This file contains the description of what each endpoint should do
 
 <context:CALCULATE_BOLLINGER_ENDPOINT>
 Endpoint: POST /calculate-bollinger
-Description: Accepts calculation jobs for Bollinger Bands. Users provide parameters including a time range for the BTC/USDT pair. 
+Description: Accepts calculation jobs for Bollinger Bands. Users provide parameters including a time range for the BTC/USDT pair. Saves the result in the db. 
 Payload Example: {"start_time": "YYYY-MM-DDTHH:MM:SSZ", "end_time": "YYYY-MM-DDTHH:MM:SSZ", "period": 20, "standard_deviation_multiplier": 2}
 Response: Returns a job ID for result retrieval.
 <context:CALCULATE_BOLLINGER_ENDPOINT/>
 
 <context:RETRIEVE_BOLLINGER_RESULT_ENDPOINT>
 Endpoint: GET /result/{job_id}
-Description: Retrieves the result of a Bollinger Bands calculation job using the provided job ID.
+Description: Retrieves the result of a Bollinger Bands calculation job from the db using the provided job ID.
 Response Example: {"job_id": "xyz123", "status": "Completed", "result": {"upper_band": [], "middle_band": [], "lower_band": []}}
 <context:RETRIEVE_BOLLINGER_RESULT_ENDPOINT/>
 

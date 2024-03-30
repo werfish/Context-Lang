@@ -18,5 +18,43 @@
 
 # <context:DB_PY>
 # <CreateDatabaseConnection>
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session
+import os
+
+# DATABASE URL
+DATABASE_URL = "sqlite:///./database.db"
+
+# ENGINE CREATION
+engine = create_engine(
+    DATABASE_URL, connect_args={"check_same_thread": False}
+)
+
+# SESSION LOCAL DEFINITION
+# This class will allow us to create a session in each request
+SessionLocal = scoped_session(
+    sessionmaker(autocommit=False, autoflush=False, bind=engine)
+)
+
+# BASE CLASS FOR ORM MODELS
+Base = declarative_base()
+
+# DB INITIALIZATION FUNCTION
+def init_db():
+    # This function checks for the existence of the database and creates the tables if they do not exist.
+    
+    # Import all the models
+    import db_models
+    
+    # Ensure the SQLite database file exists
+    if not os.path.exists("./database.db"):
+        # If not, create the SQLite file
+        open("./database.db", 'a').close()
+    
+    # Create all tables in the database by using metadata
+    Base.metadata.create_all(bind=engine)
+
+# The init_db function will be called inside the db_models.py once all models are defined.
 # <CreateDatabaseConnection/>
 # <context:DB_PY/>

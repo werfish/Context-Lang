@@ -1,66 +1,68 @@
 #<import>MANIFEST.txt<import/>
 #<context:DATABASE_SETUP>
-# This context describes the setup for a PostgreSQL database connection using SQLAlchemy in a FastAPI application. It should include creating the database URI from environment variables and initializing the SQLAlchemy engine and session.
-# Please assume that the environment variables for the database connection are already defined.
-# Please create a function wich checks whether any tables are created or not. 
-# if not the function should create the tables. This function will be run in main.py on startup.
+# This is the DB intialization file for the project. 
+# It contains the database URL for SQLite3 and the base class for the ORM models.
+# I need this file to contain a function that will create the DB if it doesn't exist.
+# and create all the tables based on the models defined in db_models.py.
+# THE MODELS WILL BE WRITTEN AFTER THIS FILE, SO THE FUNCTION WILL BE CALLED IN THE MODELS FILE!!
+# it will be run in models.py to ensure the database is created and the tables are created.
+# The database needs to have a name database.db and be located in the root directory of the project.
 #<context:DATABASE_SETUP/>
 
 #<prompt:CreateDatabaseConnection>
 # Based on the DATABASE_SETUP context, generate the SQLAlchemy database connection code, including engine creation and SessionLocal definition.
 # {DATABASE_SETUP}
+# {LIBRARIES}
+# {INFRASTRUCTURE}
 #<prompt:CreateDatabaseConnection/>
 
-# <context:DB.PY>
+# <context:DB_PY>
 # <CreateDatabaseConnection>
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import OperationalError
 import os
 
-# Define the base for our models
-Base = declarative_base()
+# Define the path for SQLite3 database. 
+DATABASE_URL = "sqlite:///./database.db"
+Base = declarative_base()  # The base class to create models
 
-# Retrieve the database connection variables from the environment
-DATABASE_URL = os.environ.get('DATABASE_URL')
-DATABASE_PORT = os.environ.get('DATABASE_PORT')
-DATABASE_USER = os.environ.get('DATABASE_USER')
-DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')
-DATABASE_NAME = os.environ.get('DATABASE_NAME')
+# Create an engine that the Session will use for connection resources.
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-# Construct the PostgreSQL connection string
-SQLALCHEMY_DATABASE_URI = (
-    f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}"
-    f"@{DATABASE_URL}:{DATABASE_PORT}/{DATABASE_NAME}"
-)
-
-# Create the SQLAlchemy engine
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-
-# Create a SessionLocal class which will serve as a factory for new Session objects
+# Create a custom SessionLocal class that will establish the actual sessions later.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+def create_database():
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # Check for the existence of SQLite3 database file and create it if not exists
+    if not os.path.exists('./database.db'):
+        # Create the database file
+        try:
+            conn = engine.connect()
+            conn.close()
+        except OperationalError as e:
+            print(f"An error occurred while creating the database: {e}")
+    
+    # Import the models and create all tables
+    # This import must be here to avoid circular imports as it relies on the Base and engine defined above
+    from db_models import Base  # Import the Base from db_models.py
+    
+    # Use Base to create all tables in the database.
+    Base.metadata.create_all(bind=engine)
 
-def check_and_create_tables():
-    """
-    Function that checks if the tables are created and creates them if not.
+# This function must be called after defining all models in db_models.py to ensure tables creation
 
-    It uses the SQLAlchemy Base metadata to reflect and create the tables in
-    the database.
-    """
-    try:
-        # Check for existing tables
-        if not engine.dialect.has_table(engine, 'some_table_name'):  # Replace 'some_table_name' with an actual table name
-            # Create tables if they don't exist
-            Base.metadata.create_all(bind=engine)
-            print("Tables created successfully.")
-        else:
-            print("Tables already exist.")
-    except ProgrammingError:
-        print("An error occurred while checking for tables.")
-
-# Note: You need to ensure that the table name passed to has_table is accurate,
-# and that you have defined your SQLAlchemy models with Base before calling check_and_create_tables.
+# Don't forget to run this function in your `db_models.py` file to create/update database tables:
+# from database_setup import create_database
+# create_database()
 # <CreateDatabaseConnection/>
-# <context:DB.PY/>
+# <context:DB_PY/>

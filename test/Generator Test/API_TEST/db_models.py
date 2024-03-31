@@ -1,78 +1,91 @@
 # # Import global project settings and libraries
 # <import>MANIFEST.txt<import/>
-# <import>DataModel.txt<import/>
 # <import>db.py<import/>
+# <file:DataModel>DataModel.txt<file:DataModel/>
 
 # # Prompt for generating SQLAlchemy models
 # <prompt:GenerateORMModels>
-# Please generate SQLAlchemy ORM models based on the project descriptions and specifications provided. This should include models for calculation jobs, calculation results, and fake limit orders as detailed in the project documentation.
-# database setup is in db.py file.
+# Please generate SQLAlchemy ORM models based on the project descriptions and specifications provided. 
+# This should include models for calculation jobs, calculation results, and fake limit orders as detailed in the project documentation.
+# db.py file contains the database engine and session setup and has a function to create the database tables if they don't exist.
+# Please call this function after models are created to ensure the tables are created in the database.
 # {PROJECT_DESCRIPTION} 
 # {LIBRARIES} 
-# {CreateDatabaseConnection}
-# {DB.PY}
+# {DataModel}
+# {DB_PY}
 # <prompt:GenerateORMModels/>
 
 # <context:DB_MODELS_PY>
 # <GenerateORMModels>
-from sqlalchemy import Column, Integer, Float, String, create_engine, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import IntegrityError, OperationalError
-from sqlalchemy.future import select
+from sqlalchemy import Column,Integer, DateTime, Enum, Float, ForeignKey, JSON, String
+from sqlalchemy.dialects.sqlite import DECIMAL
+from sqlalchemy.orm import relationship
+from uuid import uuid4
+import enum
+from db import Base, create_database
 
-# Assuming you have a config file or environment variable management for the DB URI.
-# from config import SQLALCHEMY_DATABASE_URI
-DATABASE_URI = "sqlite:///./test.db"  # Placeholder, replace with actual DB URI
+# Enums for status fields
+class CalculationJobStatus(enum.Enum):
+    pending = 'pending'
+    processing = 'processing'
+    completed = 'completed'
+    failed = 'failed'
 
-Base = declarative_base()
+class FakeLimitOrderStatus(enum.Enum):
+    open = 'open'
+    cancelled = 'cancelled'
+    executed = 'executed'
 
-# Database connection setup
-engine = create_engine(DATABASE_URI, echo=True, future=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+class FakeLimitOrderDirection(enum.Enum):
+    buy = 'buy'
+    sell = 'sell'
 
-# Models
 class CalculationJob(Base):
     __tablename__ = 'calculation_jobs'
+    job_id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
+    period = Column(Integer)
+    standard_deviation_multiplier = Column(Float)
+    status = Column(Enum(CalculationJobStatus))
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
     
-    id = Column(Integer, primary_key=True, index=True)
-    status = Column(String, default="pending")
-    btc_usdt_pair = Column(String, index=True)
-    # additional fields as necessary
-    
-    # Relationship to calculate results
+    # Relationship to CalculationResult
     results = relationship("CalculationResult", back_populates="job")
-
+    
 class CalculationResult(Base):
     __tablename__ = 'calculation_results'
+    result_id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    job_id = Column(String, ForeignKey('calculation_jobs.job_id'))
+    upper_band = Column(JSON)
+    middle_band = Column(JSON)
+    lower_band = Column(JSON)
+    calculated_at = Column(DateTime)
     
-    id = Column(Integer, primary_key=True, index=True)
-    job_id = Column(Integer, ForeignKey('calculation_jobs.id'))
-    value = Column(Float)  # Change to appropriate field type
-    # additional fields as necessary
-    
-    # Relationship to calculation jobs
+    # Relationship to CalculationJob
     job = relationship("CalculationJob", back_populates="results")
-    
+
 class FakeLimitOrder(Base):
     __tablename__ = 'fake_limit_orders'
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer)  # or a ForeignKey to a User model, if exists
-    price = Column(Float)
-    amount = Column(Float)
-    side = Column(String)
-    # additional fields as necessary
+    order_id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    type = Column(String, default='limit')
+    price = Column(DECIMAL)
+    quantity = Column(DECIMAL)
+    direction = Column(Enum(FakeLimitOrderDirection))
+    status = Column(Enum(FakeLimitOrderStatus))
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
-# Create the database tables
-Base.metadata.create_all(bind=engine)
+# Uncomment and use the following class if storing price data is required for your application.
+class PriceData(Base):
+    __tablename__ = 'price_data'
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    timestamp = Column(DateTime)
+    price = Column(DECIMAL)
+    volume = Column(DECIMAL, nullable=True)
 
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Ensure the database and tables are created after defining the models.
+create_database()
 # <GenerateORMModels/>
 # <context:DB_MODELS_PY/>

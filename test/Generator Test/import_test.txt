@@ -1,0 +1,8 @@
+<import>NFT_Staking_2.sol<import/>
+
+<prompt:RewardCalc>
+Please just print the code given to you in the code.
+{CODE}
+<prompt:RewardCalc/>
+
+{RewardCalc}

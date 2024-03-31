@@ -1,5 +1,7 @@
 #<context:PROJECT_DESCRIPTION>
-A FastAPI-based application designed to accept calculation jobs for Bollinger Bands on a 1-second timeframe for the BTC/USDT pair. Users can submit and edit fake limit orders. The architecture is based on Domain-Driven Design, with separate components for managing endpoints, database interactions, data models, Binance integration, and messaging queues.
+A FastAPI-based application designed to accept calculation jobs for Bollinger Bands on a 1-second timeframe for the BTC/USDT pair. 
+A scheduled process is collecting pricess every 1 second CONTINOUSLY, that the api can use to calculate for the jobs.
+Users can submit and edit fake limit orders.
 #<context:PROJECT_DESCRIPTION/>
 
 #<context:LIBRARIES>
@@ -9,18 +11,15 @@ Pydantic: Data validation and settings management using Python type annotations.
 Tenacity: A retrying library for Python, simplifying the task of adding retry behavior.
 Requests: A simple, yet elegant HTTP library for Python, built for human beings.
 Standard Logger: Utilized for application logging, ensuring transparent and efficient logging practices.
+schedule: Utilized for scheduling
 #<context:LIBRARIES/>
 
 #<context:TOOLS>
 Git: The distributed version control system.
-Pre-commit: A framework for managing and maintaining multi-language pre-commit hooks, including black for Python and eslint for JavaScript.
 #<context:TOOLS/>
 
 #<context:INFRASTRUCTURE>
-Docker: To containerize the application and its components.
-RabbitMQ: For handling message queuing.
-PostgreSQL: As the primary database for storing application data.
-Redis: Used for caching and as a message broker.
+SQLite3: as a main database
 #<context:INFRASTRUCTURE/>
 
 #<context:INTEGRATIONS_3RD_PARTY>
@@ -28,7 +27,13 @@ Binance: For retrieving live cryptocurrency data, specifically BTC/USDT pair pri
 #<context:INTEGRATIONS_3RD_PARTY/>
 
 #<context:ARCHITECTURE>
-Domain-Driven Design: The project is structured around Domain-Driven Design principles, separating concerns into distinct layers - endpoints and main FastAPI setup, database interactions, SQLAlchemy models, Pydantic models for data validation, Binance integration for live data fetching, a scanner for 1-second price updates, Redis operations for caching, and RabbitMQ for message queuing.
+main.py will contain all endpoint code using Dependency Injection
+db.pt will contain db initialization logic
+db_models will contain SQL Alchemy models
+querries.py will contain ORM queries
+binance.py will contain the binance functions needed for the integration
+data_download_schedule.py will be a scheduled process downloading the data
+pydantic_models.py contains the pydantic models for Inputs and returns of the api
 #<context:ARCHITECTURE/>
 
 #<context:TESTING_STRATEGY>

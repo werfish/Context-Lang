@@ -41,3 +41,13 @@ Fields:
   - created_at: DateTime
   - updated_at: DateTime
 #<context:FAKE_LIMIT_ORDER_MODEL/>
+
+#<context:PRICE_DATA>
+# Entity: PriceData
+# Description: Stores BTC/USDT prices at 1-second intervals.
+# Fields:
+#   - id: UUID (Primary Key)
+#   - timestamp: DateTime (The exact moment the price was recorded)
+#   - price: Decimal (BTC in USDT)
+#   - volume: Decimal (Optional, trading volume)
+#<context:PRICE_DATA/>

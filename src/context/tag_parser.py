@@ -72,7 +72,7 @@ def __tag_parsing_process(path):
 
         if tag == "Import_Context_Variables":
             for match in matches:
-                import_path = matches[0].strip() if matches else None
+                import_path = match.strip() if matches else None
 
                 # Parse the file at import_path for context variables and add them to context_dict
                 Log.logger.debug("IMPORT CONTEXT: -----------" + import_path) 
@@ -88,6 +88,7 @@ def __tag_parsing_process(path):
                 import_path = match[1].strip()
 
                 # Parse the file at import_path for the specific context variable and add it to context_dict
+                Log.logger.debug("IMPORT SPECIFIC CONTEXT: -----------" + import_path + "----" + varName) 
                 with open(import_path, 'r') as file:
                     import_content = file.read()
                     import_context_variable = re.findall(f"(?s)<context:{varName}>(.*?)<context:{varName}/>", import_content)
@@ -146,15 +147,15 @@ def parse_tags(file_paths, in_comment_signs):
     comment_signs = in_comment_signs
 
     for path in file_paths:
-        try:
-            task = __tag_parsing_process(path)
-            if task is not None:
-                tasks.append(task)
-        except IOError:
-            Log.logger.debug(f"Could not read file: {path}")
-        except ValueError as ve:
-            Log.logger.debug("An error occurred during tag parsing:")
-            Log.logger.debug(traceback.format_exc())
-            continue
+        # try:
+        task = __tag_parsing_process(path)
+        if task is not None:
+            tasks.append(task)
+        # except IOError:
+        #     Log.logger.debug(f"Could not read file: {path}")
+        # except ValueError as ve:
+        #     Log.logger.debug("An error occurred during tag parsing:")
+        #     Log.logger.debug(traceback.format_exc())
+        #     continue
 
     return tasks

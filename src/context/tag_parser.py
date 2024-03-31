@@ -67,6 +67,9 @@ def __tag_parsing_process(path):
             for match in matches:
                 varName, filePath = match
                 Log.logger.debug(varName + "------" + filePath.strip())
+                if varName in context_dict:
+                    raise ValueError(f"File'{varName}' already declared. {path}.")
+
                 with open(filePath.strip(), 'r') as file:
                     context_dict[varName] = file.read()
 
@@ -80,6 +83,8 @@ def __tag_parsing_process(path):
                     import_content = file.read()
                     import_context_variables = re.findall(regexPatterns["Context_Variables"], import_content)
                     for import_varName, import_varContent in import_context_variables:
+                        if varName in context_dict:
+                            raise ValueError(f"Context variable '{varName}' from '{import_path}' already exists in scope of {path}.")
                         context_dict[import_varName] = import_varContent.strip()
 
         if tag == "Import_Specific_Context_Variable":
@@ -92,6 +97,8 @@ def __tag_parsing_process(path):
                 with open(import_path, 'r') as file:
                     import_content = file.read()
                     import_context_variable = re.findall(f"(?s)<context:{varName}>(.*?)<context:{varName}/>", import_content)
+                    if varName in context_dict:
+                        raise ValueError(f"Context variable '{varName}' from '{import_path}' already exists in scope of {path}.")
                     if import_context_variable:
                         context_dict[varName] = import_context_variable[0].strip()
 
@@ -99,10 +106,17 @@ def __tag_parsing_process(path):
             global_context = matches[0][0].strip() if matches else None
         elif tag == "Context_Variables":
             for match in matches:
-                context_dict[match[0]] = match[1].strip()
+                varName, varContent = match
+                if varName in context_dict:
+                    raise ValueError(f"Context variable '{varName}' already declared in file {path}.")
+                context_dict[varName] = varContent.strip()
+
         elif tag == "Prompts":
             for match in matches:
-                prompts[match[0]] = match[1].strip()
+                promptName, promptContent = match
+                if promptName in prompts:
+                    raise ValueError(f"Prompt '{promptName}' already declared in file {path}.")
+                prompts[promptName] = promptContent.strip()
                 
         elif tag == "Prompt_Output_Tags":
             for match in matches:
@@ -110,7 +124,7 @@ def __tag_parsing_process(path):
                 tag_content = match[1]
                 
                 if varName in context_dict:
-                    raise ValueError(f"Prompt output variable '{varName}' already exists in context_dict in file {path}")
+                    raise ValueError(f"Prompt output variable '{varName}' already declared in file {path}")
                 
                 prompt_outputs_tags[varName] = tag_content.strip()
 

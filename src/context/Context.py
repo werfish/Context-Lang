@@ -97,10 +97,17 @@ def contextProcess():
 
     Log.logger.debug(paths)
 
-    tasks = parse_tags(paths,Config.Comment_Characters)
-    Log.logger.debug("\nTASKS")
-    for task in tasks:
-        Log.logger.debug(task)
+    try:
+        tasks = parse_tags(paths, Config.Comment_Characters)
+        Log.logger.debug("\nTASKS")
+        for task in tasks:
+            Log.logger.debug(task)
+    except Exception as e:
+        # Here, we log the full exception with stack trace
+        Log.logger.error("An error occurred during tag parsing.", exc_info=True)
+        # And then print a more user-friendly message
+        print(f"Error encountered: {e}. Please check the log for more details.")
+        return  # Exiting or handling error as needed
 
     if(Config.ParserOnly):
         return None

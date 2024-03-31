@@ -2,11 +2,43 @@
 
 <!-- <prompt:Main>
   Please generate a html file with the following. Assign ids for the navbar and content sections
-  - Navbar section with links to tokenomics.html, finalVision.html, presale.html, whitepapre.html 
-  and a Enter App button
+  - Navbar section with links to tokenomics.html, finalVision.html, presale.html, whitepaper.html 
+  and an Enter App button which should link to app.html and is located at the end of the navbar.
   - Content section which has a title and a description.
+  - Please use New Bitcoin as the title and give it some generic web3 description
   - Please use style.css file
 <prompt:Main/> -->
 
 <!--<context:HTML>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Bitcoin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Navbar section -->
+<nav id="navbar">
+  <ul>
+    <li><a href="tokenomics.html">Tokenomics</a></li>
+    <li><a href="finalVision.html">Final Vision</a></li>
+    <li><a href="presale.html">Presale</a></li>
+    <li><a href="whitepaper.html">Whitepaper</a></li>
+    <li><a href="app.html" class="enter-app-btn">Enter App</a></li>
+  </ul>
+</nav>
+
+<!-- Content section -->
+<section id="content">
+  <h1>New Bitcoin</h1>
+  <p>
+    New Bitcoin is the next evolution of decentralized digital currency, built on cutting-edge blockchain technology. It's designed to provide secure, fast, and low-cost transactions, reinventing the concept of financial freedom and accessibility in the Web3 era. New Bitcoin aims to create a more inclusive financial ecosystem that empowers users and developers alike.
+  </p>
+</section>
+
+</body>
+</html>
 <!--<context:HTML/>-->

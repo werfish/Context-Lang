@@ -6,47 +6,89 @@
 
 /* <prompt:Main>
 Please write me the style.css file for the html code provided.
-1. The navbar should be at the top of the page with a heigh of 20px
-2. The elements should be on the right side of the screen
-3. Navabar color should dark blue, any text inside should be white
-4. The button color should be orange with black bold letters.
-5. The button should have a nice onHover effect of your choosing
+1. The navbar should be at the top of the page with a heigh of 50px
+2. The elements of the navbar should be on the right side of the screen
+3. Navbar color should be dark blue, any text inside should be white (except the button)
+4. The Enter app button color should be orange with black bold letters.
+5. The button should have a nice onHover effect of your choosing, have a fitting border with a radius of 5px
+6. The button needs to be the last on right
+7. Content section should be centered vertically and horizontally, it should take up the rest of the page
+8. The body should have a slighlty lighter background color than the navbar and letters shoud be white
 {HTML}
 <prompt:Main/> */
 
 /*<Main>*/
-/* Style for the navbar */
-.navbar {
-  background-color: darkblue; /* Navbar color set to dark blue */
-  color: white;               /* Text color inside navbar set to white */
-  height: 20px;               /* Navbar height set to 20px */
-  line-height: 20px;          /* Centering text vertically */
-  position: fixed;            /* Make navbar stick to the top of the page */
+/* General body styles */
+body {
+  background-color: #1e3a5f; /* slightly lighter background color than the navbar */
+  color: white;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  align-items: center; /* helps to center the content section vertically */
+  justify-content: center; /* helps to center the content section horizontally */
+  height: 100vh; /* sets the body height to 100% of the viewport height */
+}
+
+/* Navbar styles */
+#navbar {
+  background-color: #172235; /* dark blue background */
+  color: white;
+  height: 50px;
+  width: 100%;
+  position: fixed; /* keeps the navbar at the top */
   top: 0;
   left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-/* Style for navbar elements to be aligned to the right */
-.navbar-elements {
   display: flex;
-  justify-content: flex-end;
-  margin-right: 10px; /* Margin on the right for some spacing */
+  align-items: center; /* vertically aligns navbar content */
+  justify-content: flex-end; /* aligns navbar elements to the right side */
+  padding-right: 20px; /* ensures some spacing on the right */
 }
 
-/* Style for buttons inside the navbar and other places */
-.button {
-  background-color: orange; /* Button color set to orange */
-  color: black;            /* Button text color set to black */
-  font-weight: bold;       /* Button text is bold */
-  cursor: pointer;         /* Change mouse cursor to pointer when over button */
-  transition: transform 0.3s ease, background-color 0.3s ease; /* Transition effect for smooth hover animation */
+#navbar ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
 }
 
-/* Hover effect for buttons */
-.button:hover {
-  background-color: #e69500; /* Darken the button color a bit when hovered */
-  transform: scale(1.05);    /* Make the button scale up slightly */
+#navbar li {
+  margin-left: 20px; /* space between navbar items */
+}
+
+#navbar a {
+  text-decoration: none;
+  color: white; /* text color for navbar links */
+  transition: color 0.3s; /* smooth transition for hover effect on links */
+}
+
+#navbar a:hover {
+  text-decoration: underline; /* hover effect for links */
+}
+
+/* Enter app button styles */
+.enter-app-btn {
+  background-color: orange;
+  color: black;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: solid 2px orange; /* matching border to the button color */
+  border-radius: 5px;
+  transition: all 0.3s; /* smooth transition for hover effect on the button */
+}
+
+.enter-app-btn:hover {
+  background-color: #f5a623; /* slightly lighter orange on hover */
+  border-color: #f5a623; /* border color changes on hover to match */
+  transform: scale(1.05); /* scale effect on hover */
+}
+
+/* Content section styles */
+#content {
+  text-align: center;
+  max-width: 800px; /* limits the width of the content */
+  margin-top: 70px; /* extra spacing from the top to avoid overlap with the navbar */
+  padding: 20px;
+  box-sizing: border-box; /* ensures padding does not affect width */
 }
 /*<Main/>*/

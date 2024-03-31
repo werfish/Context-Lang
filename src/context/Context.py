@@ -14,6 +14,9 @@
 import argparse
 from dotenv import load_dotenv
 import os
+from collections import defaultdict
+from colorama import init, Fore, Style
+import textwrap
 
 from .config import Config
 from .file_manager import get_file_paths
@@ -98,13 +101,16 @@ def contextProcess():
     Log.logger.debug(paths)
 
     try:
-        tasks = parse_tags(paths, Config.Comment_Characters)
+        tasks, errors = parse_tags(paths, Config.Comment_Characters)
         Log.logger.debug("\nTASKS")
         for task in tasks:
             Log.logger.debug(task)
+        if errors:  # If there are any collected errors
+            print_formatted_errors(errors)
+            return  # Exit the process after printing errors
     except Exception as e:
         # Here, we log the full exception with stack trace
-        Log.logger.error("An error occurred during tag parsing.", exc_info=True)
+        Log.logger.error("An unexpected error occurred during the process.", exc_info=True)
         # And then print a more user-friendly message
         print(f"Error encountered: {e}. Please check the log for more details.")
         return  # Exiting or handling error as needed
@@ -113,8 +119,27 @@ def contextProcess():
         return None
 
     generate_code(tasks)
+
+def print_formatted_errors(errors):
+    # Group errors by file
+    errors_by_file = defaultdict(list)
+    for error in errors:
+        path, error_message = error.split(": ", 1)
+        rel_path = path.replace("Error in file ", "")
+        errors_by_file[rel_path].append(error_message)
+    
+    # Print errors grouped by file
+    for file, error_messages in sorted(errors_by_file.items()):
+        print(f"{Fore.CYAN}./{file}{Style.RESET_ALL}")
+        for message in error_messages:
+            wrapped_message = textwrap.fill(message, width=70, subsequent_indent=' ' * 9)
+            print(f"{Fore.RED}         • {wrapped_message}{Style.RESET_ALL}")
+        print(f"{Fore.MAGENTA}{'-'*80}{Style.RESET_ALL}")  # Line separator for visual separation
     
 def main():
+    # Initialize Colorama
+    init(autoreset=True)
+
     #Handle entry arguments
     args = entryArguments()
 

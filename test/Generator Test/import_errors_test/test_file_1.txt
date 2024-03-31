@@ -1,0 +1,6 @@
+
+<context:A>Variable A content<context:A/>
+<context:B>Variable B content<context:B/>
+<context:new1>This is new context variable 1<context:new1/>
+<context:new2>This is new context variable 2<context:new2/>
+<context:new3>This is new context variable 3<context:new3/>

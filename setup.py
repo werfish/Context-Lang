@@ -5,7 +5,7 @@ setup(
     description='Cross-platform, AI code generator CLI tool and ContexLang preprocessor',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    version='0.1.5',
+    version='0.1.54',
     install_requires=[
         'requests>=2.24.0,<3.0.0',
         'python-dotenv>=0.15.0,<0.20.0',

@@ -65,6 +65,7 @@ def entryArguments():
 
 def configurationProcess(args):
     dotenv_path = os.path.join(os.getcwd(), '.env')
+    load_dotenv(dotenv_path)
     
     Config.Debug = args.debug
     Config.Log = args.log

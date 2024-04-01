@@ -2,6 +2,9 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 ### Python ###
+#PYPI
+.pypirc
+
 #Context specific#
 **/Context*Logs/
 

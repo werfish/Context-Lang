@@ -131,9 +131,13 @@ def print_formatted_errors(errors):
     # Print errors grouped by file
     for file, error_messages in sorted(errors_by_file.items()):
         print(f"{Fore.CYAN}./{file}{Style.RESET_ALL}")
+        error_count = 0  # Initialize error count for each file
         for message in error_messages:
             wrapped_message = textwrap.fill(message, width=70, subsequent_indent=' ' * 9)
             print(f"{Fore.RED}         • {wrapped_message}{Style.RESET_ALL}")
+            error_count += 1  # Increment error count for each error
+        # Print summary line for each file
+        print(f"{Fore.YELLOW}Total errors in {file}: {error_count}{Style.RESET_ALL}")
         print(f"{Fore.MAGENTA}{'-'*80}{Style.RESET_ALL}")  # Line separator for visual separation
     
 def main():

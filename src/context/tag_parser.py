@@ -65,7 +65,7 @@ def __tag_parsing_process(path):
         matches = re.findall(pattern, content)  # Use content for all matches
 
         if tag == "Global" and len(matches) > 1:
-            error_msg = f"Multiple Global tags found in file {path}"
+            error_msg = f"{tag}: Multiple Global tags found in file {path}"
             errors.append(error_msg)
             Log.logger.error(error_msg)
 
@@ -75,7 +75,7 @@ def __tag_parsing_process(path):
                     varName, filePath = match
                     Log.logger.debug(varName + "------" + filePath.strip())
                     if varName in context_dict:
-                        raise ValueError(f"File'{varName}' already declared in {path}.")
+                        raise ValueError(f"{tag}: File'{varName}' already declared in scope.")
 
                     with open(filePath.strip(), 'r') as file:
                         context_dict[varName] = file.read()
@@ -95,7 +95,7 @@ def __tag_parsing_process(path):
                     for import_varName, import_varContent in import_context_variables:
                         try:
                             if import_varName in context_dict:
-                                raise ValueError(f"Context variable '{import_varName}' from '{import_path}' already exists in scope of {path}.")
+                                raise ValueError(f"{tag}: Context variable '{import_varName}' from '{import_path}' already exists in scope.")
                             context_dict[import_varName] = import_varContent.strip()
                         except Exception as e:
                             errors.append(f"{os.path.relpath(path)}: {str(e)}")
@@ -112,13 +112,13 @@ def __tag_parsing_process(path):
                     import_content = file.read()
                     import_context_variable = re.findall(f"(?s)<context:{varName}>(.*?)<context:{varName}/>", import_content)
                     if varName in context_dict:
-                        e = (f"Context variable '{varName}' from '{import_path}' already exists in scope of {path}.")
+                        e = (f"{tag}: Context variable '{varName}' from '{import_path}' already exists in scope of {path}.")
                         errors.append(f"{os.path.relpath(path)}: {str(e)}")
                         Log.logger.error(f"Error processing {tag} in {path}: {str(e)}")
                     if import_context_variable:
                         context_dict[varName] = import_context_variable[0].strip()
                     else:
-                        e = (f"Context variable '{varName}' does not exists in '{import_path}'.")
+                        e = (f"{tag}: Context variable '{varName}' does not exists in '{import_path}'.")
                         errors.append(f"{os.path.relpath(path)}: {str(e)}")
                         Log.logger.error(f"Error processing {tag} in {path}: {str(e)}")
 
@@ -130,7 +130,7 @@ def __tag_parsing_process(path):
                 try:
                     varName, varContent = match
                     if varName in context_dict:
-                        raise ValueError(f"Context variable '{varName}' already declared in file {path}.")
+                        raise ValueError(f"{tag}: Context variable '{varName}' already declared in file.")
                     context_dict[varName] = varContent.strip()
                 except Exception as e:
                     errors.append(f"{os.path.relpath(path)}: {str(e)}")
@@ -141,7 +141,7 @@ def __tag_parsing_process(path):
                 try:
                     promptName, promptContent = match
                     if promptName in prompts:
-                        raise ValueError(f"Prompt '{promptName}' already declared in file {path}.")
+                        raise ValueError(f"{tag}: Prompt '{promptName}' already declared in file.")
                     prompts[promptName] = promptContent.strip()
                 except Exception as e:
                     errors.append(f"{os.path.relpath(path)}: {str(e)}")
@@ -154,7 +154,7 @@ def __tag_parsing_process(path):
                     tag_content = match[1]
                     
                     if varName in context_dict:
-                        raise ValueError(f"Prompt output variable '{varName}' already declared in file {path}")
+                        raise ValueError(f"{tag}: Prompt output variable '{varName}' already declared in file.")
                     
                     prompt_outputs_tags[varName] = tag_content.strip()
                 except Exception as e:
@@ -206,7 +206,7 @@ def parse_tags(file_paths, in_comment_signs):
             if file_errors:
                 errors.extend(file_errors)  # Collect errors from each file
         except Exception as e:  # Catch general exceptions to collect all errors
-            errors.append(f"Error in file {os.path.relpath(path)}: {e}")
+            errors.append(f"{os.path.relpath(path)}: {e}")
             Log.logger.error(f"Error processing file {path}: {e}", exc_info=True)  # Log with stack trace
 
     return tasks, errors  # Return both tasks and collected errors

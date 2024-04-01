@@ -41,17 +41,19 @@ def __single_file_flow(task):
         # Generate the output
         response = generate_code_with_chat(final_prompt,prompt_name)
 
-        # Parse the response JSON
-        response_json = json.loads(response)
-        
-        # Extract the generated code
-        code = response_json.get('code', '').strip()
+        # Proceed only if response is not None
+        if response is not None:
+            # Parse the response JSON
+            response_json = json.loads(response)
+            
+            # Extract the generated code
+            code = response_json.get('code', '').strip()
 
-        # For now mock the code change
-        Log.logger.debug(f"Generated code for {prompt_name}:\n{code}\n")
+            # For now mock the code change
+            Log.logger.debug(f"Generated code for {prompt_name}:\n{code}\n")
 
-        # Apply the code
-        __apply_code(code, task, prompt_name)
+            if code:  # Ensure there's generated code
+                __apply_code(code, task, prompt_name)
 
 def __process_prompt(prompt, task):
     # Copy the prompt to avoid modifying the original

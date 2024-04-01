@@ -65,8 +65,6 @@ def entryArguments():
 
 def configurationProcess(args):
     dotenv_path = os.path.join(os.getcwd(), '.env')
-    if not load_dotenv(dotenv_path):
-        raise FileNotFoundError("No .env file found in the current working directory.")
     
     Config.Debug = args.debug
     Config.Log = args.log
@@ -78,6 +76,9 @@ def configurationProcess(args):
         Config.Api_Key = os.getenv("CONTEXT_CONFIG_Open_Ai_Api_Key")
 
     #Config.Comment_Characters = str(os.getenv("CONTEXT_CONFIG_Comment_Characters")).replace("'","").split(",")
+        
+    if Config.Api_Key is None:
+        raise ValueError("OpenAI API Key is required. Please provide it as an argument, environment variable or in the .env file.")
 
     if args.filepath is not None:
         Config.FilePathProvided = True

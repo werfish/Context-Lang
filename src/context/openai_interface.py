@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 from openai import OpenAI
-from tenacity import retry, wait_random_exponential, stop_after_attempt
 import requests
 
 from .config import Config
@@ -109,7 +108,6 @@ def generate_code_with_chat(prompt,prompt_name):
     code = response2.json()["choices"][0]["message"]["function_call"]["arguments"]
     return code
 
-@retry(wait=wait_random_exponential(min=1, max=40), stop=stop_after_attempt(3))
 def chat_completion_request(messages, functions=None, function_call=None, model=GPT_MODEL):
     headers = {
         "Content-Type": "application/json",

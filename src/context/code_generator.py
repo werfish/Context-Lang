@@ -33,7 +33,9 @@ def __single_file_flow(task):
         return
 
     # Process each prompt in the task
-    for prompt_name, prompt in task.prompts.items():
+    prompt_names = getattr(task, "prompt_order", None) or list(task.prompts.keys())
+    for prompt_name in prompt_names:
+        prompt = task.prompts[prompt_name]
 
         # Assemble the prompt
         final_prompt = __process_prompt(prompt, task)

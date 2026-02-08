@@ -22,6 +22,7 @@ from .config import Config
 from .file_manager import get_file_paths
 from .tag_parser import parse_tags
 from .code_generator import generate_code
+from .ast import build_prompt_order
 from .log import Log,configure_logger
 
 logger = None
@@ -120,6 +121,7 @@ def contextProcess():
     if(Config.ParserOnly):
         return None
 
+    build_prompt_order(tasks)
     generate_code(tasks)
 
 def print_formatted_errors(errors):

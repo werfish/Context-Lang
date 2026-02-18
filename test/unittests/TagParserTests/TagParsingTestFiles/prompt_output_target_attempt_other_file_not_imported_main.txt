@@ -1,0 +1,5 @@
+<prompt:C->A>
+Attempt to modify A that lives in a different file (not imported).
+<prompt:C->A/>
+
+{C}

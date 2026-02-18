@@ -23,7 +23,16 @@ class PromptDependencyCycleError(ValueError):
 
     ContextLang prompt ordering requires a DAG. Cycles make execution order undefined,
     so we fail fast before any generation/write steps occur.
+
+    Attributes:
+        filepath: Source file that contains the cyclic prompt graph.
+        cyclic_prompts: List of prompt names that are part of (or blocked by) the cycle.
     """
+
+    def __init__(self, message: str, filepath: str | None = None, cyclic_prompts: list[str] | None = None):
+        super().__init__(message)
+        self.filepath = filepath
+        self.cyclic_prompts = cyclic_prompts or []
 
 
 def build_prompt_order(tasks):
@@ -75,6 +84,6 @@ def _order_prompts(task):
             "instead of circular dependencies."
         )
         Log.logger.error(msg)
-        raise PromptDependencyCycleError(msg)
+        raise PromptDependencyCycleError(msg, filepath=task.filepath, cyclic_prompts=remaining_prompts)
 
     return processed, layers

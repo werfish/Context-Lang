@@ -19,7 +19,7 @@ from collections import defaultdict
 from colorama import Fore, Style, init
 from dotenv import load_dotenv
 
-from .ast import build_prompt_order
+from .ast import PromptDependencyCycleError, build_prompt_order
 from .code_generator import generate_code
 from .config import Config
 from .file_manager import get_file_paths
@@ -129,11 +129,31 @@ def contextProcess():
     if Config.ParserOnly:
         return None
 
-    try:
-        build_prompt_order(tasks)
-    except Exception as e:
-        # Fail fast before any generation/write happens.
-        print(f"AST error: {e}")
+    # Semantic parsing (AST prompt ordering): collect per-file errors so the user can fix them in one pass.
+    ast_errors = []
+    for task in tasks:
+        try:
+            build_prompt_order([task])
+        except PromptDependencyCycleError as e:
+            rel_path = os.path.relpath(getattr(e, "filepath", None) or task.filepath)
+            cyclic = getattr(e, "cyclic_prompts", None) or []
+            cyclic_part = f" Cyclic prompts: {cyclic}." if cyclic else ""
+            msg = (
+                "AST: prompt dependency cycle detected." + cyclic_part + " Prompt ordering requires an acyclic graph. "
+                "Break the cycle by splitting prompts into a one-way chain (e.g., A depends on B depends on C), "
+                "or remove the circular {PromptName} references."
+            )
+            ast_errors.append(f"Error in file {rel_path}: {msg}")
+            Log.logger.error(msg)
+        except Exception as e:
+            # Keep behavior safe and user-friendly; we still include the file context.
+            rel_path = os.path.relpath(task.filepath)
+            msg = f"AST: unexpected error while ordering prompts: {e}"
+            ast_errors.append(f"Error in file {rel_path}: {msg}")
+            Log.logger.error(msg, exc_info=True)
+
+    if ast_errors:
+        print_formatted_errors(ast_errors)
         return
 
     generate_code(tasks)

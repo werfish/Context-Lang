@@ -1,0 +1,9 @@
+<prompt:A>
+mentions {A} and {UNKNOWN}
+<prompt:A/>
+
+<prompt:B>
+uses {A}
+<prompt:B/>
+
+{B}

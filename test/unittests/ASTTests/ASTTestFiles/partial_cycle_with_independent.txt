@@ -1,0 +1,15 @@
+<prompt:X>
+independent
+<prompt:X/>
+
+<prompt:A>
+uses {B}
+<prompt:A/>
+
+<prompt:B>
+uses {A}
+<prompt:B/>
+
+{X}
+{A}
+{B}

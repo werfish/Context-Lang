@@ -1,0 +1,10 @@
+<prompt:A>
+alpha
+<prompt:A/>
+
+<prompt:B>
+beta
+<prompt:B/>
+
+{A}
+{B}

@@ -1,0 +1,13 @@
+<prompt:A>
+A
+<prompt:A/>
+
+<prompt:B>
+B
+<prompt:B/>
+
+<prompt:C>
+needs {A} and {B}
+<prompt:C/>
+
+{C}

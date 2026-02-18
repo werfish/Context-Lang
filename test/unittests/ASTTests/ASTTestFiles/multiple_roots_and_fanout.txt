@@ -1,0 +1,19 @@
+<prompt:Root>
+R
+<prompt:Root/>
+
+<prompt:D1>
+depends {Root}
+<prompt:D1/>
+
+<prompt:D2>
+also depends {Root}
+<prompt:D2/>
+
+<prompt:Solo>
+independent
+<prompt:Solo/>
+
+{D1}
+{D2}
+{Solo}

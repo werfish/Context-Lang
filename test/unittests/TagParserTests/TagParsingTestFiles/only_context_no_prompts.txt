@@ -1,0 +1,7 @@
+<context>
+global
+<context/>
+
+<context:FOO>
+bar
+<context:FOO/>

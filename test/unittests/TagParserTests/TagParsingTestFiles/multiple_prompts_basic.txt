@@ -1,0 +1,9 @@
+<prompt:A>
+Alpha
+<prompt:A/>
+
+<prompt:B>
+Beta
+<prompt:B/>
+
+before {A} middle {B} after

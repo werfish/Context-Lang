@@ -1,0 +1,13 @@
+<context>
+FIRST
+<context/>
+
+<context>
+SECOND
+<context/>
+
+<prompt:X>
+Do
+<prompt:X/>
+
+{X}

@@ -1,0 +1,9 @@
+<file:PAYLOAD>
+__PAYLOAD_PATH__
+<file:PAYLOAD/>
+
+<prompt:P>
+Use PAYLOAD
+<prompt:P/>
+
+{P}

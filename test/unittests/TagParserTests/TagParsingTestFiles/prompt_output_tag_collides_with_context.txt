@@ -1,0 +1,13 @@
+<context:Alpha>
+ctx
+<context:Alpha/>
+
+<prompt:P>
+Do
+<prompt:P/>
+
+<Alpha>
+out
+<Alpha/>
+
+{P}

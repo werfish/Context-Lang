@@ -1,0 +1,13 @@
+<context:ONE>
+main
+<context:ONE/>
+
+<import>
+__IMPORTED_PATH__
+<import/>
+
+<prompt:P>
+Use ONE
+<prompt:P/>
+
+{P}

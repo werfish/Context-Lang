@@ -1,0 +1,5 @@
+<prompt:Inner>
+This prompt references {Inner} but only inside itself.
+<prompt:Inner/>
+
+# no placeholder outside

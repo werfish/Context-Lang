@@ -1,0 +1,9 @@
+<import:MISSING>
+__IMPORTED_PATH__
+<import:MISSING/>
+
+<prompt:P>
+Use MISSING
+<prompt:P/>
+
+{P}

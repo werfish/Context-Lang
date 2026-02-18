@@ -59,6 +59,13 @@ pytest-cov = "^7.0.0"
 [tool.poetry.scripts]
 Context = "context.Context:main"
 
+[tool.pytest.ini_options]
+# Prevent pytest from collecting fixture project files that happen to be named like tests.
+norecursedirs = [
+  "test/Generator Test",
+  "test/integration/import_errors_test",
+]
+
 [tool.ruff]
 line-length = 120
 target-version = "py310"

@@ -50,6 +50,29 @@ If a hook reports issues, fix them and re-run:
 poetry run pre-commit run --all-files
 ```
 
+## Testing
+
+### Unit tests
+
+Run the unit test suite:
+
+```bash
+poetry run pytest
+```
+
+Run unit tests with coverage (and show missing lines):
+
+```bash
+poetry run pytest --cov=context --cov-report=term-missing
+```
+
+### Integration tests
+
+Integration tests live under `test/integration/` and are intended to exercise multi-module flows.
+
+**All integration tests must run with the Mock LLM enabled** (i.e. they must not require API keys and must not make network calls).
+The real LLM/provider integration is validated in end-to-end tests only.
+
 ## Packaging notes
 
 The project metadata and dependencies are configured in `pyproject.toml` using Poetry.

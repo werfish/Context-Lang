@@ -1,0 +1,4 @@
+def f():
+    x = "<prompt:Hello>Write code<prompt:Hello/>"
+    y = "{Hello}"
+    return x + y

@@ -1,0 +1,11 @@
+def f():
+    # prompt tag in comment just so a task exists
+    #<prompt:P>do thing<prompt:P/>
+
+    # output tag appears inside a string literal
+    x = "<P>OLD<P/>"
+
+    # but we also include a real output tag for P below
+    <P>
+    OLD
+    <P/>

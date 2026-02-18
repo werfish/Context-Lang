@@ -1,0 +1,5 @@
+def f():
+    # This would previously be silently ignored.
+    # Now we fail fast on unknown tags like <prmpt:...>, even inside strings.
+    x = "<prmpt:Hello>Write<prompt:Hello/>"
+    return x

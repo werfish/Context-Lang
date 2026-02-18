@@ -1,0 +1,9 @@
+DOC = """
+This is a docstring that includes a ContextLang prompt tag.
+<prompt:Hello>
+Write code
+<prompt:Hello/>
+"""
+
+# Output placeholder outside the prompt body:
+{Hello}

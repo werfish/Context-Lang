@@ -10,7 +10,7 @@
     - Another option is to use Poetry wchich I am currently looking into. DONE
     - Implement CI/CD to test features in different environments.
     - Rewrite the parser and language grammar in textX for allowing easy extending of the language
-    - Migrate from setup.py to pyproject.toml approach DONE
+    - Migrate from setup.py to pyproject.toml approach
     - Use langchain for all the functionality
 
 2. **Development Documentation**: Create a document detailing how to run the project for development.

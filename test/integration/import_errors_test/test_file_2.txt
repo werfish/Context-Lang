@@ -1,0 +1,2 @@
+<context:C>Variable C content<context:C/>
+<context:D>Variable D content<context:D/>

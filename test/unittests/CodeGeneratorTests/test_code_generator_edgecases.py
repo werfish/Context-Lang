@@ -31,6 +31,7 @@ class _FakeFS:
 
     def __init__(self, files: dict[str, str]):
         self.files = dict(files)
+        self.write_count = 0
 
     def open(self, path: str, mode: str = "r", *_args: Any, **_kwargs: Any):
         if "r" in mode:
@@ -39,6 +40,7 @@ class _FakeFS:
             return io.StringIO(self.files[path])
 
         if "w" in mode:
+            self.write_count += 1
             buf = io.StringIO()
             original_close = buf.close
 
@@ -183,3 +185,62 @@ def test_process_prompt_leaves_unknown_placeholders_intact():
 
     assert "KNOWN:\nk" in out
     assert "{UNKNOWN}" in out
+
+
+def test_apply_code_no_placeholder_branch_prints_message_and_leaves_file_unchanged(monkeypatch):
+    fake_path = "memory://no_placeholder.txt"
+    fs = _FakeFS({fake_path: "before\n"})
+    monkeypatch.setattr(builtins, "open", fs.open)
+
+    task = _make_task(filepath=fake_path, prompts={"P": "x"})
+
+    printed = []
+    monkeypatch.setattr(builtins, "print", lambda msg: printed.append(msg))
+
+    code_generator.__apply_code("NEW", task, "P")
+
+    assert fs.files[fake_path] == "before\n"
+    assert fs.write_count == 0
+    assert any("No output placeholder found" in str(m) for m in printed)
+
+
+def test_apply_code_no_placeholder_branch_for_unknown_prompt_name_is_safe(monkeypatch):
+    fake_path = "memory://no_placeholder_unknown_prompt.txt"
+    fs = _FakeFS({fake_path: "before\n"})
+    monkeypatch.setattr(builtins, "open", fs.open)
+
+    task = _make_task(filepath=fake_path, prompts={"Other": "x"})
+
+    printed = []
+    monkeypatch.setattr(builtins, "print", lambda msg: printed.append(msg))
+
+    code_generator.__apply_code("NEW", task, "NotInTask")
+
+    assert fs.files[fake_path] == "before\n"
+    assert fs.write_count == 0
+    assert any("No output placeholder found" in str(m) for m in printed)
+
+
+def test_single_file_flow_skips_task_with_no_outputs_and_never_calls_llm(monkeypatch):
+    monkeypatch.setattr(Config, "MockLLM", False)
+
+    fake_path = "memory://skip_no_outputs.txt"
+    fs = _FakeFS({fake_path: "<anything/>\n"})
+    monkeypatch.setattr(builtins, "open", fs.open)
+
+    task = _make_task(filepath=fake_path, prompts={"P": "x"})
+    # Note: no prompt_outputs, no prompt_outputs_tags, no prompt_output_targets.
+
+    called = {"n": 0}
+
+    def fake_generate(*_args, **_kwargs):
+        called["n"] += 1
+        return json.dumps({"code": "X"})
+
+    monkeypatch.setattr(code_generator, "generate_code_with_chat", fake_generate)
+
+    code_generator.__single_file_flow(task)
+
+    assert called["n"] == 0
+    assert fs.write_count == 0
+    assert fs.files[fake_path] == "<anything/>\n"

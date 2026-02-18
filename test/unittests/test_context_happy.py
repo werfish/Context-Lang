@@ -130,3 +130,88 @@ second
 
     out = capsys.readouterr().out
     assert "Total errors in" in out
+
+
+def test_context_process_parser_only_with_nonexistent_filepath_prints_error(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    missing = tmp_path / "does_not_exist.txt"
+
+    args = SimpleNamespace(
+        debug=False,
+        log=False,
+        parser=True,
+        mock_llm=True,
+        filepath=str(missing),
+        openrouter_key=None,
+        model=Config.Model,
+    )
+    configurationProcess(args)
+    Log.logger = configure_logger(debug=False, logToFile=False)
+
+    contextProcess()
+
+    out = capsys.readouterr().out
+    # Current behavior: parse_tags reports file-scoped error lines and Context prints them via print_formatted_errors.
+    assert "Total errors in" in out
+    assert "No such file or directory" in out or "Errno" in out
+
+
+def test_context_process_parser_only_with_directory_filepath(tmp_path: Path) -> None:
+    # Directory with at least one parsable file.
+    d = tmp_path / "proj"
+    d.mkdir()
+
+    (d / "a.txt").write_text(
+        """
+<prompt:A>
+Do thing
+<prompt:A/>
+
+{A}
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    args = SimpleNamespace(
+        debug=False,
+        log=False,
+        parser=True,
+        mock_llm=True,
+        filepath=str(d),
+        openrouter_key=None,
+        model=Config.Model,
+    )
+    configurationProcess(args)
+    Log.logger = configure_logger(debug=False, logToFile=False)
+
+    assert contextProcess() is None
+
+
+def test_context_process_parser_only_with_empty_string_filepath_is_handled(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    args = SimpleNamespace(
+        debug=False,
+        log=False,
+        parser=True,
+        mock_llm=True,
+        filepath="",
+        openrouter_key=None,
+        model=Config.Model,
+    )
+    configurationProcess(args)
+    Log.logger = configure_logger(debug=False, logToFile=False)
+
+    # Current behavior: likely prints a friendly error (FileNotFoundError) rather than crashing.
+    contextProcess()
+    out = capsys.readouterr().out
+    assert "Error encountered" in out
+
+
+def test_print_formatted_errors_raises_on_malformed_error_string() -> None:
+    from context.Context import print_formatted_errors
+
+    # No ": " delimiter => split will fail.
+    with pytest.raises(ValueError):
+        print_formatted_errors(["this has no delimiter"])

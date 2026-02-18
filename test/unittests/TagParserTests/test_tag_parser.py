@@ -1,15 +1,19 @@
 """Unit tests for ContextLang tag parsing.
 
-These tests intentionally focus on behaviors that should be testable *without* refactoring the parser and
-without heavy mocking.
+These tests focus on behaviors that are testable *without* refactoring the parser and without heavy mocking.
+
+Fixtures
+- Test inputs live in `TagParsingTestFiles/` next to this file.
+- Those files contain literal ContextLang tags (`<context:...>`, `<prompt:...>`, `<import>`, `{PromptName}`, etc.).
+- The tests copy fixture contents into `tmp_path` at runtime so we can substitute absolute file paths for
+  `<import>` / `<file>` cases while still keeping the fixture data readable and reusable.
 
 Strategy
-- Use pytest tmp_path to write synthetic files and call parse_tags([...]).
-- Initialize Log.logger once so tag_parser can log without crashing.
+- Use pytest `tmp_path` to write synthetic files and call `parse_tags([...])`.
+- Initialize `Log.logger` once so `tag_parser` can log without crashing.
 
 Note
-Some tests describe the *desired/spec* behavior (robust parsing) and may currently fail if the
-implementation is buggy. This is intentional: they serve as a safety net while improving the parser.
+Assertions are written to match the *current implementation behavior* of `src/context/tag_parser.py`.
 """
 
 from __future__ import annotations

@@ -53,6 +53,8 @@ gitignore-parser = "0.1.11"
 pre-commit = "^3.8.0"
 ruff = "^0.6.8"
 bandit = "^1.7.9"
+pytest = "^9.0.2"
+pytest-cov = "^7.0.0"
 
 [tool.poetry.scripts]
 Context = "context.Context:main"

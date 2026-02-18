@@ -11,24 +11,25 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-import traceback
-import re
 import json
+import traceback
 
-from .openai_interface import generate_code_with_chat
 from .log import Log
+from .openai_interface import generate_code_with_chat
+
 
 def generate_code(tasks):
     for task in tasks:
         try:
             __single_file_flow(task)
-        except Exception as e:
+        except Exception:
             Log.logger.debug(f"Error while processing task from file {task.filepath}:")
             traceback.print_exc()
 
+
 def __single_file_flow(task):
-    # If there are no prompt outputs or prompt output tags in the task, skip this task
-    if not task.prompt_outputs and not task.prompt_outputs_tags:
+    # If there are no prompt outputs / output tags / output-target mappings in the task, skip this task
+    if not task.prompt_outputs and not task.prompt_outputs_tags and not getattr(task, "prompt_output_targets", {}):
         Log.logger.debug(f"No prompt outputs or output tags in task from file {task.filepath}. Skipping this task.")
         return
 
@@ -41,21 +42,22 @@ def __single_file_flow(task):
         final_prompt = __process_prompt(prompt, task)
 
         # Generate the output
-        response = generate_code_with_chat(final_prompt,prompt_name)
+        response = generate_code_with_chat(final_prompt, prompt_name)
 
         # Proceed only if response is not None
         if response is not None:
             # Parse the response JSON
             response_json = json.loads(response)
-            
+
             # Extract the generated code
-            code = response_json.get('code', '').strip()
+            code = response_json.get("code", "").strip()
 
             # For now mock the code change
             Log.logger.debug(f"Generated code for {prompt_name}:\n{code}\n")
 
             if code:  # Ensure there's generated code
                 __apply_code(code, task, prompt_name)
+
 
 def __process_prompt(prompt, task):
     # Copy the prompt to avoid modifying the original
@@ -79,12 +81,16 @@ def __process_prompt(prompt, task):
 
     return constructedPrompt
 
+
 def __apply_code(code, task, prompt_name):
     # Open the file and read its contents
-    with open(task.filepath, 'r') as file:
+    with open(task.filepath) as file:
         original_code_lines = file.readlines()
 
     updated_code_lines = original_code_lines.copy()  # create a copy to modify
+
+    # Optional: prompt writes into a different output-tag variable.
+    output_target = getattr(task, "prompt_output_targets", {}).get(prompt_name)
 
     # Determine if the prompt output is {} or <>
     if prompt_name in task.prompt_outputs:
@@ -95,29 +101,30 @@ def __apply_code(code, task, prompt_name):
             # If the placeholder is found in this line
             if output_placeholder in line:
                 # Replace the entire line with the generated code
-                updated_code_lines[i] = code + '\n'  # Add a newline to preserve formatting
+                updated_code_lines[i] = code + "\n"  # Add a newline to preserve formatting
 
-    elif prompt_name in task.prompt_outputs_tags:
-        start_tag = f"<{prompt_name}>"
-        end_tag = f"<{prompt_name}/>"
-        
+    elif output_target is not None or prompt_name in task.prompt_outputs_tags:
+        tag_name = output_target or prompt_name
+        start_tag = f"<{tag_name}>"
+        end_tag = f"<{tag_name}/>"
+
         # Find the lines with the start and end tags
         start_line = next(i for i, line in enumerate(original_code_lines) if start_tag in line)
         end_line = next(i for i, line in enumerate(original_code_lines) if end_tag in line)
 
         # Replace the lines between the tags with the new code
         # We add a newline character at the end of each line in the generated code
-        updated_code_lines[start_line + 1:end_line] = [line + '\n' for line in code.split('\n')]
+        updated_code_lines[start_line + 1 : end_line] = [line + "\n" for line in code.split("\n")]
 
     else:
         print(f"No output placeholder found for prompt {prompt_name}")
         return
 
     # Reassemble the lines into a string
-    updated_code = ''.join(updated_code_lines)
+    updated_code = "".join(updated_code_lines)
 
     Log.logger.debug(f"Final code:\n{updated_code}\n")
 
     # Overwrite the file with the updated code
-    with open(task.filepath, 'w') as file:
+    with open(task.filepath, "w") as file:
         file.write(updated_code)

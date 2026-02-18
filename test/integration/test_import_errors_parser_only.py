@@ -33,7 +33,7 @@ def _remove_lines(path: Path, lines_to_remove: list[str]) -> None:
 
 
 def test_import_errors_parser_only_flow_mimics_bat_script(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    """Integration test (python API) mirroring test/Generator Test/import_errors_test/run_test.bat.
+    """Integration test (python API) mirroring test/E2E/import_errors_test/run_test.bat.
 
     We run parser-only mode in a temp copy of the fixture project, while temporarily adding ignore rules
     for IgnoredFiles/ into .gitignore.

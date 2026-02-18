@@ -10,6 +10,8 @@ setup(
         'requests>=2.24.0,<3.0.0',
         'python-dotenv>=0.15.0,<0.20.0',
         'openai==1.14.3',
+        'langgraph>=0.2.35,<0.3.0',
+        'langchain-openrouter>=0.1.2,<0.2.0',
         'tenacity>=6.3.1,<7.0.0',
         'colorama>=0.4.3,<1.0.0',
         'gitignore_parser==0.1.11'

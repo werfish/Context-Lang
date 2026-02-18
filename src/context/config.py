@@ -14,6 +14,7 @@
 
 from .log import Log
 
+
 class Config:
     Comment_Characters = ""
     Api_Key = ""
@@ -23,3 +24,5 @@ class Config:
     Debug = False
     Log = False
     ParserOnly = False
+    Model = "openai/gpt-5.2"
+    Supported_Models = ["openai/gpt-5.2", "openai/gpt-3.5-turbo"]

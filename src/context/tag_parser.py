@@ -222,6 +222,16 @@ def __tag_parsing_process(path):
         else:
             Log.logger.debug(f"{prompt_name} not found in content_without_prompts")
 
+    # Validate prompt output targets: target tag must exist in the same file.
+    # Cross-file writes are not supported; output targets must reference an existing output tag
+    # captured in prompt_outputs_tags for this Task.
+    for prompt_name, target_name in prompt_output_targets.items():
+        if target_name not in prompt_outputs_tags:
+            raise ValueError(
+                f"Prompts: Prompt '{prompt_name}' targets output tag '{target_name}', "
+                "but no such output tag exists in this file."
+            )
+
     # A Task is only created if there are prompts in the file
     if len(prompts) > 0:
         task = Task(

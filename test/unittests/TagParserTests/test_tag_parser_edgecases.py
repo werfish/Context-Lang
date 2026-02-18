@@ -262,12 +262,7 @@ def test_parse_tags_prompt_output_target_double_arrow_is_ignored_without_crashin
     assert errors == []
 
 
-def test_parse_tags_prompt_output_target_missing_output_tag_is_not_validated_by_parser(tmp_path: Path) -> None:
-    """Tag parser records C->A mapping even if <A>...</A/> is not present.
-
-    This is current behavior: validation happens (and fails) later during code application.
-    """
-
+def test_parse_tags_prompt_output_target_missing_output_tag_raises_error(tmp_path: Path) -> None:
     file_path = write_file(
         tmp_path,
         "prompt_output_target_missing_tag_same_file.txt",
@@ -276,23 +271,12 @@ def test_parse_tags_prompt_output_target_missing_output_tag_is_not_validated_by_
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
-    assert errors == []
-    assert len(tasks) == 1
-
-    task = tasks[0]
-    assert set(task.prompts.keys()) == {"C"}
-    assert task.prompt_output_targets == {"C": "A"}
-
-    # A is not present as an output tag in this file.
-    assert "A" not in task.prompt_outputs_tags
+    # parse_tags catches exceptions and returns them as error strings; no task should be created.
+    assert tasks == []
+    assert any("targets output tag 'A'" in e for e in errors)
 
 
-def test_parse_tags_prompt_output_target_attempt_other_file_not_imported_is_not_detected(tmp_path: Path) -> None:
-    """You can't target an output tag in another file unless that file is processed as a task.
-
-    The parser has no cross-file awareness here and will not error.
-    """
-
+def test_parse_tags_prompt_output_target_attempt_other_file_not_imported_raises_error(tmp_path: Path) -> None:
     file_path = write_file(
         tmp_path,
         "prompt_output_target_attempt_other_file_not_imported_main.txt",
@@ -301,9 +285,6 @@ def test_parse_tags_prompt_output_target_attempt_other_file_not_imported_is_not_
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
-    assert errors == []
-    assert len(tasks) == 1
-
-    task = tasks[0]
-    assert task.prompt_output_targets == {"C": "A"}
-    assert "A" not in task.prompt_outputs_tags
+    # Without a local <A>...</A/> tag, this is treated as invalid and rejected.
+    assert tasks == []
+    assert any("targets output tag 'A'" in e for e in errors)

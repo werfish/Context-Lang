@@ -13,12 +13,20 @@
 #    limitations under the License.
 import json
 
+from .config import Config
 from .graph import run_generation_graph
 from .log import Log
 
 
 def generate_code_with_chat(prompt, prompt_name):
     Log.logger.debug(f"Generated Prompt:\n{prompt}")
+
+    if Config.MockLLM:
+        generated_code = f"MOCK_LLM_RESPONSE({prompt_name})"
+        Log.logger.debug("MOCK LLM RESPONSE------------------------------")
+        Log.logger.debug(generated_code)
+        Log.logger.debug("-----------------------------------------------")
+        return json.dumps({"code": generated_code})
 
     try:
         generated_code = run_generation_graph(prompt, prompt_name)

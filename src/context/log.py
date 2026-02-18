@@ -11,28 +11,29 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-import os
 import logging
+import os
 from datetime import datetime
 
-class Log():
+
+class Log:
     logger = None
 
-def configure_logger(debug, logToFile):
 
+def configure_logger(debug, logToFile):
     # Set level to DEBUG if debug is True, otherwise set level to INFO.
     log_level = logging.DEBUG if debug else logging.INFO
 
     # Define the log format
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     # If logToFile is True, create a new directory (if necessary) and log to a new file.
     if logToFile:
-        if not os.path.exists('Context_Logs'):
-            os.makedirs('Context_Logs')
+        if not os.path.exists("Context_Logs"):
+            os.makedirs("Context_Logs")
 
-        timestamp = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
-        log_file = f'Context_Logs/context_log_{timestamp}.txt'
+        timestamp = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+        log_file = f"Context_Logs/context_log_{timestamp}.txt"
         logging.basicConfig(level=log_level, format=log_format, filename=log_file)
 
     # If logToFile is False, log to console.
@@ -40,4 +41,3 @@ def configure_logger(debug, logToFile):
         logging.basicConfig(level=log_level, format=log_format)
 
     return logging.getLogger(__name__)
-

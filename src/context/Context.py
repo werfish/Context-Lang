@@ -41,6 +41,14 @@ def entryArguments():
     )
 
     parser.add_argument(
+        "--mock-llm",
+        action="store_true",
+        help="Mock LLM responses (for tests). Skips API key validation.",
+        required=False,
+        default=False,
+    )
+
+    parser.add_argument(
         "--filepath",
         metavar="filepath",
         type=str,
@@ -74,6 +82,7 @@ def configurationProcess(args):
     Config.Debug = args.debug
     Config.Log = args.log
     Config.ParserOnly = args.parser
+    Config.MockLLM = getattr(args, "mock_llm", False)
 
     if args.openrouter_key is not None:
         Config.Api_Key = args.openrouter_key
@@ -84,7 +93,7 @@ def configurationProcess(args):
 
     # Config.Comment_Characters = str(os.getenv("CONTEXT_CONFIG_Comment_Characters")).replace("'","").split(",")
 
-    if Config.Api_Key is None:
+    if not Config.MockLLM and Config.Api_Key is None:
         raise ValueError(
             "OpenRouter API Key is required. Please provide it as an argument, "
             "environment variable or in the .env file."

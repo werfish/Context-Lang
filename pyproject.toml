@@ -62,6 +62,9 @@ Context = "context.Context:main"
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+exclude = [
+  "test/Generator Test",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

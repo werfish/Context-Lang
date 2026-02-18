@@ -12,8 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from .log import Log
-
 
 class Config:
     Comment_Characters = ""
@@ -24,5 +22,10 @@ class Config:
     Debug = False
     Log = False
     ParserOnly = False
+
+    # When True, the CLI will not require an API key and LLM calls will be mocked.
+    # Intended for end-to-end/integration tests.
+    MockLLM = False
+
     Model = "openai/gpt-5.2"
     Supported_Models = ["openai/gpt-5.2", "openai/gpt-3.5-turbo"]

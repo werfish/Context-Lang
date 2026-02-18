@@ -70,8 +70,19 @@ poetry run pytest --cov=context --cov-report=term-missing
 
 Integration tests live under `test/integration/` and are intended to exercise multi-module flows.
 
-**All integration tests must run with the Mock LLM enabled** (i.e. they must not require API keys and must not make network calls).
-The real LLM/provider integration is validated in end-to-end tests only.
+By default, integration tests must run with the **Mock LLM enabled** (i.e. they must not require API keys and must not make network calls).
+
+### LLM integration tests (opt-in)
+
+Real provider/LLM smoke tests live under `test/integration/LLM tests/` and are marked with `@pytest.mark.llm`.
+
+They are **not** run by default because they require network access/credentials and can be flaky/cost money.
+
+To run LLM tests explicitly:
+
+```bash
+poetry run pytest -m llm
+```
 
 ## Packaging notes
 

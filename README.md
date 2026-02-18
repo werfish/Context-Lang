@@ -406,3 +406,5 @@ You can find plans for the project and libraries you can learn in this project i
 
 ## License
 [Apache 2.0 License](LICENSE)
+
+See [CONTRIBUTE.md](CONTRIBUTE.md) for the full contributor workflow.

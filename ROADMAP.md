@@ -3,12 +3,11 @@
 ### Development
 
 1. **Codebase Development**: Currently, Context is just a Proof-of-Concept (POC) written with minimal effort. The lightweight nature and lack of dependencies are benefits, but as the project grows in complexity, it will require several subtasks related to project and development dependencies. These include:
-    - Integrate Pre-Commit
-    - Integrate Linters, Formatters, etc.
+    - Integrate Pre-Commit DONE
+    - Integrate Linters, Formatters, etc. DONE
     - Integrate Pytest/Coverage. Develop a strategy for testing cognitive features (for example, running and checking prompts?)
     - Integrate a make file compatible with both Windows and Linux.
-    - Another option is to use Poetry wchich I am currently looking into.
-    - Reasearch Make VS Poeatry IN PROGRESS
+    - Another option is to use Poetry wchich I am currently looking into. DONE
     - Implement CI/CD to test features in different environments.
     - Rewrite the parser and language grammar in textX for allowing easy extending of the language
     - Migrate from setup.py to pyproject.toml approach
@@ -24,7 +23,7 @@
 
 ### Context Features
 
-0. **PRIORITY**: Chat GPT4 api is availible for everyone and needs to be build in as an option.
+0. **PRIORITY**: Models should be chosen via configuration. Currently it is hardcoded or passed in the commandline. Currently only 2 open AI models are supported.
 
 1. **Bug Fixing**: The priority is to fix any bugs in the Context preprocessor and code generation for V1 Spec of ContextLang.
 
@@ -38,9 +37,9 @@
 
 6. **.context_ignore Feature**: Add a .context_ignore feature, which would work like .gitignore but for Context.
 
-7. **Asynchronous Processing**: Add async processing for each file.
+7. **Asynchronous Processing**: Add async processing for each AST tree.
 
-8. **Custom Prompts**: Add an option so a user can add their own prompts to the code generation process.
+8. **Custom Prompts**: Add an option so a user can add their own prompts to the code generation process. (basically creating workflows).
 
 ### ContextLang Features
 

@@ -42,11 +42,11 @@ def test_parse_tags_simple_global_context_and_single_prompt(tmp_path: Path) -> N
         "main.py",
         """
 # <context>
-# You are a helpful assistant.
+# This project requirements
 # <context/>
 
 # <prompt:Hello>
-# Say hi
+# Please write me a Function that does A and B.
 # <prompt:Hello/>
 
 print({Hello})

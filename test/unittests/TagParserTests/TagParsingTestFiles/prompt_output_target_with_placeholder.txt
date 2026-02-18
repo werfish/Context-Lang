@@ -1,0 +1,9 @@
+<prompt:C->A>
+Do thing
+<prompt:C->A/>
+
+{C}
+
+<A>
+old
+<A/>

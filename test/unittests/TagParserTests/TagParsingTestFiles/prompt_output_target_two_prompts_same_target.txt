@@ -1,0 +1,14 @@
+<prompt:C->A>
+Do C
+<prompt:C->A/>
+
+<prompt:D->A>
+Do D
+<prompt:D->A/>
+
+{C}
+{D}
+
+<A>
+old
+<A/>

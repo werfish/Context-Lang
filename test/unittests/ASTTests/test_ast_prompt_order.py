@@ -156,3 +156,23 @@ def test_ast_cycle_with_dependent_raises_error(tmp_path: Path) -> None:
 
     with pytest.raises(PromptDependencyCycleError):
         build_prompt_order([task])
+
+
+def test_ast_workflow_same_target_tag_orders_prompts_by_dependencies(tmp_path: Path) -> None:
+    """Workflow-like prompt chain where multiple prompts write into the same output tag.
+
+    Scenario (mirrors Robert's example):
+    - A writes into <X>
+    - B depends on A
+    - C depends on B
+    - D depends on C and writes into <X>
+    - E writes into <X>
+
+    Expected AST ordering: A -> B -> C -> D -> E.
+    """
+
+    task = _parse_single_task(tmp_path, "workflow_same_target_tag.txt")
+
+    build_prompt_order([task])
+
+    assert task.prompt_order == ["A", "B", "C", "D", "E"]

@@ -288,3 +288,145 @@ def test_parse_tags_prompt_output_target_attempt_other_file_not_imported_raises_
     # Without a local <A>...</A/> tag, this is treated as invalid and rejected.
     assert tasks == []
     assert any("targets output tag 'A'" in e for e in errors)
+
+
+def test_parse_tags_prompt_output_target_with_placeholder_is_parsed_and_output_detected(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_with_placeholder.txt",
+        read_fixture("prompt_output_target_with_placeholder.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    assert errors == []
+    assert len(tasks) == 1
+
+    task = tasks[0]
+    assert task.prompts["C"] == "Do thing"
+    assert task.prompt_output_targets == {"C": "A"}
+    assert "C" in task.prompt_outputs
+    assert "A" in task.prompt_outputs_tags
+
+
+def test_parse_tags_prompt_output_target_without_placeholder_still_parses_mapping(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_without_placeholder.txt",
+        read_fixture("prompt_output_target_without_placeholder.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    assert errors == []
+    assert len(tasks) == 1
+
+    task = tasks[0]
+    assert task.prompts["C"] == "Do thing"
+    assert task.prompt_output_targets == {"C": "A"}
+    # No {C} placeholder outside prompt content => not in prompt_outputs.
+    assert "C" not in task.prompt_outputs
+    assert "A" in task.prompt_outputs_tags
+
+
+def test_parse_tags_prompt_output_target_whitespace_around_arrow_is_not_parsed(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_whitespace_around_arrow_not_parsed.txt",
+        read_fixture("prompt_output_target_whitespace_around_arrow_not_parsed.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Current regex doesn't allow whitespace in the name->target segment, so no prompts are detected.
+    assert tasks == []
+    assert errors == []
+
+
+def test_parse_tags_prompt_output_target_invalid_target_name_is_not_parsed(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_invalid_target_name_not_parsed.txt",
+        read_fixture("prompt_output_target_invalid_target_name_not_parsed.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Current regex only supports targets matching \w+.
+    assert tasks == []
+    assert errors == []
+
+
+def test_parse_tags_prompt_output_target_empty_target_is_not_parsed(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_empty_target_not_parsed.txt",
+        read_fixture("prompt_output_target_empty_target_not_parsed.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    assert tasks == []
+    assert errors == []
+
+
+def test_parse_tags_prompt_output_target_allows_two_prompts_targeting_same_tag(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_two_prompts_same_target.txt",
+        read_fixture("prompt_output_target_two_prompts_same_target.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    assert errors == []
+    assert len(tasks) == 1
+
+    task = tasks[0]
+    assert task.prompts["C"] == "Do C"
+    assert task.prompts["D"] == "Do D"
+    assert task.prompt_output_targets == {"C": "A", "D": "A"}
+    assert set(task.prompt_outputs) == {"C", "D"}
+    assert "A" in task.prompt_outputs_tags
+
+
+def test_parse_tags_malformed_prompt_missing_closing_tag_is_ignored_by_regex(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "malformed_prompt_missing_closing_tag.txt",
+        read_fixture("malformed_prompt_missing_closing_tag.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Missing closing tag => current regex does not match => no Task and no errors.
+    assert tasks == []
+    assert errors == []
+
+
+def test_parse_tags_malformed_prompt_missing_gt_in_open_tag_is_ignored_by_regex(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "malformed_prompt_missing_gt_in_open_tag.txt",
+        read_fixture("malformed_prompt_missing_gt_in_open_tag.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Missing '>' in opening tag => current regex does not match => no Task and no errors.
+    assert tasks == []
+    assert errors == []
+
+
+def test_parse_tags_malformed_prompt_closing_missing_slash_is_ignored_by_regex(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "malformed_prompt_closing_missing_slash.txt",
+        read_fixture("malformed_prompt_closing_missing_slash.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Closing tag is malformed => current regex does not match => no Task and no errors.
+    assert tasks == []
+    assert errors == []

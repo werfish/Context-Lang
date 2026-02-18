@@ -1,0 +1,29 @@
+<prompt:A->X>
+Seed X
+<prompt:A->X/>
+
+<prompt:B>
+Use {A}
+<prompt:B/>
+
+<prompt:C>
+Use {B}
+<prompt:C/>
+
+<prompt:D->X>
+Refine X using {C}
+<prompt:D->X/>
+
+<prompt:E->X>
+Final polish of X using {D}
+<prompt:E->X/>
+
+{A}
+{B}
+{C}
+{D}
+{E}
+
+<X>
+old
+<X/>

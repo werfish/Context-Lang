@@ -54,6 +54,31 @@ def test_parse_tags_prompt_output_tags_detected(tmp_path: Path) -> None:
     assert task.prompt_outputs_tags["Alpha"] == "old"
 
 
+def test_parse_tags_prompt_output_target_syntax_captures_mapping(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_basic.txt",
+        read_fixture("prompt_output_target_basic.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    assert errors == []
+    assert len(tasks) == 1
+
+    task = tasks[0]
+
+    # Prompt name is stored without the target suffix.
+    assert set(task.prompts.keys()) == {"A", "B", "C"}
+    assert task.prompts["C"] == "Refine HTML using CSS {B}"
+
+    # Target mapping present.
+    assert task.prompt_output_targets == {"C": "A"}
+
+    # Ensure the target output tag was still captured as a prompt output tag.
+    assert task.prompt_outputs_tags["A"] == "old html"
+
+
 def test_parse_tags_import_context_variables_from_other_file(tmp_path: Path) -> None:
     imported = write_file(tmp_path, "import_all_imported.txt", read_fixture("import_all_imported.txt"))
 

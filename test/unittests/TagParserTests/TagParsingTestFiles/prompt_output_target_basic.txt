@@ -1,0 +1,17 @@
+<prompt:A>
+Make HTML
+<prompt:A/>
+
+<prompt:B>
+Make CSS from {A}
+<prompt:B/>
+
+<prompt:C->A>
+Refine HTML using CSS {B}
+<prompt:C->A/>
+
+<A>
+old html
+<A/>
+
+{B}

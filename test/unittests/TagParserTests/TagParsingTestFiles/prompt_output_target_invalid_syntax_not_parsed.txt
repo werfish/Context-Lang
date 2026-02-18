@@ -1,0 +1,7 @@
+<prompt:C->>
+invalid
+<prompt:C->/>
+
+<A>
+old
+<A/>

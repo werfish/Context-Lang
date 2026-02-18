@@ -1,0 +1,7 @@
+<prompt:C->A->B>
+invalid
+<prompt:C->A->B/>
+
+<A>
+old
+<A/>

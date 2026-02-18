@@ -218,3 +218,45 @@ def test_parse_tags_file_with_only_context_tags_creates_no_task(tmp_path: Path) 
 
     assert tasks == []
     assert errors == []
+
+
+def test_parse_tags_prompt_output_target_duplicate_prompt_reports_error(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_duplicate_prompt.txt",
+        read_fixture("prompt_output_target_duplicate_prompt.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Task still created, but duplicate prompt name should be reported.
+    assert len(tasks) == 1
+    assert any("Prompts" in e and "Prompt 'C'" in e for e in errors)
+
+
+def test_parse_tags_prompt_output_target_invalid_syntax_is_ignored_without_crashing(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_invalid_syntax_not_parsed.txt",
+        read_fixture("prompt_output_target_invalid_syntax_not_parsed.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Invalid prompt tag should not match the regex => no prompts => no Task.
+    assert tasks == []
+    assert errors == []
+
+
+def test_parse_tags_prompt_output_target_double_arrow_is_ignored_without_crashing(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "prompt_output_target_double_arrow_not_parsed.txt",
+        read_fixture("prompt_output_target_double_arrow_not_parsed.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    # Invalid prompt tag should not match the regex => no prompts => no Task.
+    assert tasks == []
+    assert errors == []

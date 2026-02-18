@@ -1,0 +1,15 @@
+<prompt:C->A>
+first
+<prompt:C->A/>
+
+<prompt:C->B>
+second
+<prompt:C->B/>
+
+<A>
+a
+<A/>
+
+<B>
+b
+<B/>

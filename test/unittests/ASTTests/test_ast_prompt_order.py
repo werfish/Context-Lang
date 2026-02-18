@@ -22,9 +22,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from conftest import read_fixture, write_file
 
-from context.ast import build_prompt_order
+from context.ast import PromptDependencyCycleError, build_prompt_order
 from context.tag_parser import parse_tags
 
 
@@ -82,6 +83,45 @@ def test_ast_multiple_roots_and_fanout_layers(tmp_path: Path) -> None:
     assert task.prompt_order.index("Root") < task.prompt_order.index("D2")
 
 
+def test_ast_fan_out_one_prompt_depended_on_by_three(tmp_path: Path) -> None:
+    task = _parse_single_task(tmp_path, "fan_out_three.txt")
+
+    build_prompt_order([task])
+
+    assert task.prompt_layers[0] == ["Root"]
+    assert set(task.prompt_layers[1]) == {"D1", "D2", "D3"}
+
+    assert task.prompt_order.index("Root") < task.prompt_order.index("D1")
+    assert task.prompt_order.index("Root") < task.prompt_order.index("D2")
+    assert task.prompt_order.index("Root") < task.prompt_order.index("D3")
+
+
+def test_ast_fan_in_three_prompts_depended_on_by_one(tmp_path: Path) -> None:
+    task = _parse_single_task(tmp_path, "fan_in_three.txt")
+
+    build_prompt_order([task])
+
+    assert task.prompt_layers[0] == ["A", "B", "C"]
+    assert task.prompt_layers[1] == ["D"]
+
+    assert task.prompt_order.index("D") > task.prompt_order.index("A")
+    assert task.prompt_order.index("D") > task.prompt_order.index("B")
+    assert task.prompt_order.index("D") > task.prompt_order.index("C")
+
+
+def test_ast_two_prompts_both_depend_on_three_prompts(tmp_path: Path) -> None:
+    task = _parse_single_task(tmp_path, "three_roots_two_dependents.txt")
+
+    build_prompt_order([task])
+
+    assert task.prompt_layers[0] == ["A", "B", "C"]
+    assert set(task.prompt_layers[1]) == {"D", "E"}
+
+    for root in ["A", "B", "C"]:
+        assert task.prompt_order.index(root) < task.prompt_order.index("D")
+        assert task.prompt_order.index(root) < task.prompt_order.index("E")
+
+
 def test_ast_ignores_unknown_and_self_placeholders(tmp_path: Path) -> None:
     task = _parse_single_task(tmp_path, "unknown_and_self_placeholders_ignored.txt")
 
@@ -92,22 +132,27 @@ def test_ast_ignores_unknown_and_self_placeholders(tmp_path: Path) -> None:
     assert task.prompt_layers == [["A"], ["B"]]
 
 
-def test_ast_cycle_falls_back_to_original_order(tmp_path: Path) -> None:
+def test_ast_cycle_raises_error(tmp_path: Path) -> None:
     task = _parse_single_task(tmp_path, "cycle.txt")
 
-    build_prompt_order([task])
-
-    # With a pure cycle, no prompt is ready; remaining prompts are appended in original order.
-    assert task.prompt_order == ["A", "B"]
-    assert task.prompt_layers == [["A", "B"]]
+    with pytest.raises(PromptDependencyCycleError):
+        build_prompt_order([task])
 
 
-def test_ast_partial_cycle_preserves_ready_prompts_then_appends_remaining(tmp_path: Path) -> None:
+def test_ast_partial_cycle_raises_error(tmp_path: Path) -> None:
     task = _parse_single_task(tmp_path, "partial_cycle_with_independent.txt")
 
-    build_prompt_order([task])
+    with pytest.raises(PromptDependencyCycleError):
+        build_prompt_order([task])
 
-    # X is ready; A/B are in a cycle and get appended as a fallback layer in original order.
-    assert task.prompt_layers[0] == ["X"]
-    assert task.prompt_layers[1] == ["A", "B"]
-    assert task.prompt_order == ["X", "A", "B"]
+
+def test_ast_cycle_with_dependent_raises_error(tmp_path: Path) -> None:
+    """A <-> C cycle, plus B depends on A.
+
+    We fail fast rather than falling back to original order.
+    """
+
+    task = _parse_single_task(tmp_path, "cycle_with_dependent.txt")
+
+    with pytest.raises(PromptDependencyCycleError):
+        build_prompt_order([task])

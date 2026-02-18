@@ -18,17 +18,23 @@ from .log import Log
 _PLACEHOLDER_PATTERN = re.compile(r"{(\w+)}")
 
 
+class PromptDependencyCycleError(ValueError):
+    """Raised when prompt dependencies contain a cycle.
+
+    ContextLang prompt ordering requires a DAG. Cycles make execution order undefined,
+    so we fail fast before any generation/write steps occur.
+    """
+
+
 def build_prompt_order(tasks):
+    """Populate prompt_order and prompt_layers on each task.
+
+    Raises:
+        PromptDependencyCycleError: if any task contains cyclic prompt dependencies.
+    """
+
     for task in tasks:
-        try:
-            task.prompt_order, task.prompt_layers = _order_prompts(task)
-        except Exception as e:
-            Log.logger.error(
-                f"Failed to build prompt order for {task.filepath}: {e}",
-                exc_info=True,
-            )
-            task.prompt_order = list(task.prompts.keys())
-            task.prompt_layers = [task.prompt_order]
+        task.prompt_order, task.prompt_layers = _order_prompts(task)
 
 
 def _order_prompts(task):
@@ -62,12 +68,13 @@ def _order_prompts(task):
 
     remaining_prompts = [name for name in prompt_names if name not in processed]
     if remaining_prompts:
-        Log.logger.warning(
-            "Dependency cycle detected in prompts from %s. "
-            "Falling back to original order for remaining prompts.",
-            task.filepath,
+        msg = (
+            "Dependency cycle detected in prompts from "
+            f"{task.filepath}. Cyclic prompts: {remaining_prompts}. "
+            "Please break the cycle (e.g., use a multi-pass prompt chain A->B->C) "
+            "instead of circular dependencies."
         )
-        processed.extend(remaining_prompts)
-        layers.append(remaining_prompts)
+        Log.logger.error(msg)
+        raise PromptDependencyCycleError(msg)
 
     return processed, layers

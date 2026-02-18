@@ -1,0 +1,19 @@
+<prompt:Root>
+root
+<prompt:Root/>
+
+<prompt:D1>
+depends {Root}
+<prompt:D1/>
+
+<prompt:D2>
+depends {Root}
+<prompt:D2/>
+
+<prompt:D3>
+depends {Root}
+<prompt:D3/>
+
+{D1}
+{D2}
+{D3}

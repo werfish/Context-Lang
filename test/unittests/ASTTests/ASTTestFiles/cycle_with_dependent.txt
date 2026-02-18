@@ -1,0 +1,13 @@
+<prompt:A>
+uses {C}
+<prompt:A/>
+
+<prompt:B>
+uses {A}
+<prompt:B/>
+
+<prompt:C>
+uses {A}
+<prompt:C/>
+
+{B}

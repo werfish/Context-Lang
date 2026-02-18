@@ -259,6 +259,30 @@ def __tag_parsing_process(path):
 
 
 def parse_tags(file_paths, in_comment_signs):
+    # Many parser/codegen helpers assume a configured logger.
+    # Keep parsing robust in unit tests and library use.
+    if Log.logger is None:
+        try:
+            from .log import configure_logger
+
+            Log.logger = configure_logger(debug=False, logToFile=False)
+        except Exception:
+            # Last-resort no-op logger.
+            class _NullLogger:
+                def debug(self, *args, **kwargs):
+                    return None
+
+                def info(self, *args, **kwargs):
+                    return None
+
+                def warning(self, *args, **kwargs):
+                    return None
+
+                def error(self, *args, **kwargs):
+                    return None
+
+            Log.logger = _NullLogger()
+
     tasks = []
     errors = []
 

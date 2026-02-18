@@ -76,8 +76,11 @@ def entryArguments():
 
 
 def configurationProcess(args):
-    dotenv_path = os.path.join(os.getcwd(), ".env")
-    load_dotenv(dotenv_path)
+    # Load .env for interactive CLI use, but keep unit tests isolated from any
+    # developer-local credentials present in the repo.
+    if os.getenv("PYTEST_CURRENT_TEST") is None:
+        dotenv_path = os.path.join(os.getcwd(), ".env")
+        load_dotenv(dotenv_path)
 
     Config.Debug = args.debug
     Config.Log = args.log
@@ -93,6 +96,8 @@ def configurationProcess(args):
 
     # Config.Comment_Characters = str(os.getenv("CONTEXT_CONFIG_Comment_Characters")).replace("'","").split(",")
 
+    # Current behavior (relied on by unit tests): only `None` is treated as missing.
+    # An empty string is accepted (even though it will fail later when making requests).
     if not Config.MockLLM and Config.Api_Key is None:
         raise ValueError(
             "OpenRouter API Key is required. Please provide it as an argument, "

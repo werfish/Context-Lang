@@ -41,6 +41,13 @@ def __single_file_flow(task):
         # Assemble the prompt
         final_prompt = __process_prompt(prompt, task)
 
+        # If this prompt writes into a different output-tag variable via "->",
+        # include the current contents of that target tag so the LLM can revise it.
+        output_target = getattr(task, "prompt_output_targets", {}).get(prompt_name)
+        if output_target is not None:
+            code_to_modify = __read_tag_contents_from_file(task.filepath, output_target)
+            final_prompt += f"\n\nCODE_TO_MODIFY:\n{code_to_modify}"
+
         # Generate the output
         response = generate_code_with_chat(final_prompt, prompt_name)
 
@@ -57,6 +64,26 @@ def __single_file_flow(task):
 
             if code:  # Ensure there's generated code
                 __apply_code(code, task, prompt_name)
+
+
+def __read_tag_contents_from_file(filepath: str, tag_name: str) -> str:
+    """Read the current contents between <tag_name> and <tag_name/> from disk.
+
+    This is used for output-target prompts (e.g. <prompt:D->A>) so the LLM gets the
+    up-to-date code that it is supposed to refine.
+    """
+
+    start_tag = f"<{tag_name}>"
+    end_tag = f"<{tag_name}/>"
+
+    with open(filepath, encoding="utf-8") as f:
+        lines = f.readlines()
+
+    start_line = next(i for i, line in enumerate(lines) if start_tag in line)
+    end_line = next(i for i, line in enumerate(lines) if end_tag in line)
+
+    content_lines = lines[start_line + 1 : end_line]
+    return "".join(content_lines).strip("\n")
 
 
 def __process_prompt(prompt, task):
@@ -92,7 +119,9 @@ def __apply_code(code, task, prompt_name):
     # Optional: prompt writes into a different output-tag variable.
     output_target = getattr(task, "prompt_output_targets", {}).get(prompt_name)
 
-    # Determine if the prompt output is {} or <>
+    applied_anywhere = False
+
+    # {} placeholder outputs
     if prompt_name in task.prompt_outputs:
         output_placeholder = "{" + prompt_name + "}"
 
@@ -102,8 +131,10 @@ def __apply_code(code, task, prompt_name):
             if output_placeholder in line:
                 # Replace the entire line with the generated code
                 updated_code_lines[i] = code + "\n"  # Add a newline to preserve formatting
+                applied_anywhere = True
 
-    elif output_target is not None or prompt_name in task.prompt_outputs_tags:
+    # <> output tag replacement (and output-target mapping)
+    if output_target is not None or prompt_name in task.prompt_outputs_tags:
         tag_name = output_target or prompt_name
         start_tag = f"<{tag_name}>"
         end_tag = f"<{tag_name}/>"
@@ -115,8 +146,9 @@ def __apply_code(code, task, prompt_name):
         # Replace the lines between the tags with the new code
         # We add a newline character at the end of each line in the generated code
         updated_code_lines[start_line + 1 : end_line] = [line + "\n" for line in code.split("\n")]
+        applied_anywhere = True
 
-    else:
+    if not applied_anywhere:
         print(f"No output placeholder found for prompt {prompt_name}")
         return
 

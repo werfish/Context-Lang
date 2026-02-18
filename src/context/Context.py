@@ -54,11 +54,19 @@ def entryArguments():
                         help='the path to the file to be processed (optional)',
                         required=False)
 
-    parser.add_argument('--openai_key',
-                        metavar='openai_key',
+    parser.add_argument('--openrouter_key',
+                        metavar='openrouter_key',
                         type=str,
-                        help='the OpenAI API key (optional)',
+                        help='the OpenRouter API key (optional)',
                         required=False)
+
+    parser.add_argument('--model',
+                        metavar='model',
+                        type=str,
+                        help='OpenRouter model (optional)',
+                        required=False,
+                        choices=Config.Supported_Models,
+                        default=Config.Model)
 
     args = parser.parse_args()
 
@@ -72,15 +80,17 @@ def configurationProcess(args):
     Config.Log = args.log
     Config.ParserOnly = args.parser
 
-    if args.openai_key is not None:
-        Config.Api_Key= args.openai_key
+    if args.openrouter_key is not None:
+        Config.Api_Key = args.openrouter_key
     else:
-        Config.Api_Key = os.getenv("CONTEXT_CONFIG_Open_Ai_Api_Key")
+        Config.Api_Key = os.getenv("CONTEXT_CONFIG_Open_Router_Api_Key")
+
+    Config.Model = args.model
 
     #Config.Comment_Characters = str(os.getenv("CONTEXT_CONFIG_Comment_Characters")).replace("'","").split(",")
         
     if Config.Api_Key is None:
-        raise ValueError("OpenAI API Key is required. Please provide it as an argument, environment variable or in the .env file.")
+        raise ValueError("OpenRouter API Key is required. Please provide it as an argument, environment variable or in the .env file.")
 
     if args.filepath is not None:
         Config.FilePathProvided = True
@@ -157,10 +167,12 @@ def main():
     #Setup the logging
     Log.logger = configure_logger(Config.Debug, Config.Log)
 
-    #Checking for Open AI Key
+    #Checking for OpenRouter Key
     Log.logger.debug(f"Processing file: {args.filepath}")
-    if args.openai_key:
-        Log.logger.debug(f"Using provided OpenAI key.")
+    if args.openrouter_key:
+        Log.logger.debug("Using provided OpenRouter key.")
+
+    Log.logger.debug(f"Using OpenRouter model: {Config.Model}")
 
     #Run the context process
     contextProcess()

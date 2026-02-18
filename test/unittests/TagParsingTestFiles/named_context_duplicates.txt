@@ -1,0 +1,17 @@
+<context:FOO>
+foo-value
+<context:FOO/>
+
+<context:BAR>
+bar-value
+<context:BAR/>
+
+<context:FOO>
+duplicate
+<context:FOO/>
+
+<prompt:P1>
+Use {FOO} and {BAR}
+<prompt:P1/>
+
+{P1}

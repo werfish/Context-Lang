@@ -1,0 +1,9 @@
+<prompt:Build>
+first
+<prompt:Build/>
+
+<prompt:Build>
+second
+<prompt:Build/>
+
+{Build}

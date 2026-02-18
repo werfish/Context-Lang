@@ -1,0 +1,14 @@
+<context:WS>
+
+
+	  lots of whitespace
+		and tabs
+
+<context:WS/>
+
+<prompt:WS_PROMPT>
+	Use WS
+
+<prompt:WS_PROMPT/>
+
+{WS_PROMPT}

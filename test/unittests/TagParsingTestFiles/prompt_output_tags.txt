@@ -1,0 +1,7 @@
+<prompt:Alpha>
+Generate code
+<prompt:Alpha/>
+
+<Alpha>
+old
+<Alpha/>

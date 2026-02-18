@@ -1,0 +1,9 @@
+<import>
+__IMPORTED_PATH__
+<import/>
+
+<prompt:P>
+Use ONE and TWO
+<prompt:P/>
+
+{P}

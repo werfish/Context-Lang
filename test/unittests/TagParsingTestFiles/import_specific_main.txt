@@ -1,0 +1,9 @@
+<import:ONLY>
+__IMPORTED_PATH__
+<import:ONLY/>
+
+<prompt:P>
+Use ONLY
+<prompt:P/>
+
+{P}

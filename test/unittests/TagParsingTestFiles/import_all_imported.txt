@@ -1,0 +1,7 @@
+<context:ONE>
+1
+<context:ONE/>
+
+<context:TWO>
+2
+<context:TWO/>

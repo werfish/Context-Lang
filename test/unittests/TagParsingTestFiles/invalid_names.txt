@@ -1,0 +1,9 @@
+<context:bad-name>
+value
+<context:bad-name/>
+
+<prompt:bad name>
+Nope
+<prompt:bad name/>
+
+{bad-name}

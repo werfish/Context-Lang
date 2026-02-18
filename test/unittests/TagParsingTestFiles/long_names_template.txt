@@ -1,0 +1,9 @@
+<context:{LONG_NAME}>
+value
+<context:{LONG_NAME}/>
+
+<prompt:{LONG_NAME}>
+Do thing
+<prompt:{LONG_NAME}/>
+
+{{{LONG_NAME}}}

@@ -21,12 +21,18 @@ import pytest
 from context.log import Log, configure_logger
 from context.tag_parser import parse_tags
 
+FIXTURES_DIR = Path(__file__).parent / "TagParsingTestFiles"
+
 
 @pytest.fixture(autouse=True)
 def _configure_test_logger() -> None:
     # tag_parser calls Log.logger.*; ensure it's always available in tests.
     if Log.logger is None:
         Log.logger = configure_logger(debug=False, logToFile=False)
+
+
+def _read_fixture(name: str) -> str:
+    return (FIXTURES_DIR / name).read_text(encoding="utf-8")
 
 
 def _write(tmp_path: Path, rel: str, content: str) -> Path:
@@ -37,21 +43,7 @@ def _write(tmp_path: Path, rel: str, content: str) -> Path:
 
 
 def test_parse_tags_simple_global_context_and_single_prompt(tmp_path: Path) -> None:
-    file_path = _write(
-        tmp_path,
-        "main.py",
-        """
-# <context>
-# This project requirements
-# <context/>
-
-# <prompt:Hello>
-# Please write me a Function that does A and B.
-# <prompt:Hello/>
-
-print({Hello})
-""".strip(),
-    )
+    file_path = _write(tmp_path, "simple_global_and_prompt.py", _read_fixture("simple_global_and_prompt.py"))
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
@@ -61,11 +53,14 @@ print({Hello})
     task = tasks[0]
     assert task.filepath == str(file_path)
 
-    # Current behavior: global context may be empty (allowed), and content is captured verbatim.
-    assert task.global_context in ("", "# You are a helpful assistant.", "You are a helpful assistant.")
+    # Current behavior: content is captured verbatim from between <context> and <context/> and then .strip()'d.
+    # Because the tags are inside comments, the closing-tag line's leading "# " is included in the capture.
+    # Current implementation bug/quirk: Global regex returns a string match, but code indexes matches[0][0]
+    # (first character). With a leading newline, .strip() becomes "".
+    assert task.global_context == ""
 
-    # Current behavior: prompt body may include comment prefixes and even the leading '# ' of the closing tag line.
-    assert task.prompts.get("Hello") in ("# Say hi", "Say hi", "# Say hi\n#")
+    # Same behavior for prompt body: closing tag line's leading "# " may be captured.
+    assert task.prompts == {"Hello": "# Please write me a Function that does A and B.\n#"}
     assert task.context_dict == {}
 
     # Placeholder mode: {Hello} appears outside prompt content.
@@ -73,29 +68,7 @@ print({Hello})
 
 
 def test_parse_tags_named_context_variables_and_duplicates_reported(tmp_path: Path) -> None:
-    file_path = _write(
-        tmp_path,
-        "main.txt",
-        """
-<context:FOO>
-foo-value
-<context:FOO/>
-
-<context:BAR>
-bar-value
-<context:BAR/>
-
-<context:FOO>
-duplicate
-<context:FOO/>
-
-<prompt:P1>
-Use {FOO} and {BAR}
-<prompt:P1/>
-
-{P1}
-""".strip(),
-    )
+    file_path = _write(tmp_path, "named_context_duplicates.txt", _read_fixture("named_context_duplicates.txt"))
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
@@ -110,21 +83,7 @@ Use {FOO} and {BAR}
 
 
 def test_parse_tags_duplicate_prompts_reported(tmp_path: Path) -> None:
-    file_path = _write(
-        tmp_path,
-        "main.txt",
-        """
-<prompt:Build>
-first
-<prompt:Build/>
-
-<prompt:Build>
-second
-<prompt:Build/>
-
-{Build}
-""".strip(),
-    )
+    file_path = _write(tmp_path, "duplicate_prompts.txt", _read_fixture("duplicate_prompts.txt"))
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
@@ -136,19 +95,7 @@ second
 
 
 def test_parse_tags_prompt_output_tags_detected(tmp_path: Path) -> None:
-    file_path = _write(
-        tmp_path,
-        "main.txt",
-        """
-<prompt:Alpha>
-Generate code
-<prompt:Alpha/>
-
-<Alpha>
-old
-<Alpha/>
-""".strip(),
-    )
+    file_path = _write(tmp_path, "prompt_output_tags.txt", _read_fixture("prompt_output_tags.txt"))
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
@@ -163,34 +110,11 @@ old
 
 
 def test_parse_tags_import_context_variables_from_other_file(tmp_path: Path) -> None:
-    imported = _write(
-        tmp_path,
-        "imported.txt",
-        """
-<context:ONE>
-1
-<context:ONE/>
+    imported = _write(tmp_path, "import_all_imported.txt", _read_fixture("import_all_imported.txt"))
 
-<context:TWO>
-2
-<context:TWO/>
-""".strip(),
-    )
-    main = _write(
-        tmp_path,
-        "main.txt",
-        f"""
-<import>
-{imported}
-<import/>
-
-<prompt:P>
-Use ONE and TWO
-<prompt:P/>
-
-{{P}}
-""".strip(),
-    )
+    main_template = _read_fixture("import_all_main.txt")
+    main_content = main_template.replace("__IMPORTED_PATH__", str(imported))
+    main = _write(tmp_path, "import_all_main.txt", main_content)
 
     tasks, errors = parse_tags([str(main)], in_comment_signs=[])
 
@@ -203,30 +127,11 @@ Use ONE and TWO
 
 
 def test_parse_tags_import_specific_context_variable(tmp_path: Path) -> None:
-    imported = _write(
-        tmp_path,
-        "imported.txt",
-        """
-<context:ONLY>
-value
-<context:ONLY/>
-""".strip(),
-    )
-    main = _write(
-        tmp_path,
-        "main.txt",
-        f"""
-<import:ONLY>
-{imported}
-<import:ONLY/>
+    imported = _write(tmp_path, "import_specific_imported.txt", _read_fixture("import_specific_imported.txt"))
 
-<prompt:P>
-Use ONLY
-<prompt:P/>
-
-{{P}}
-""".strip(),
-    )
+    main_template = _read_fixture("import_specific_main.txt")
+    main_content = main_template.replace("__IMPORTED_PATH__", str(imported))
+    main = _write(tmp_path, "import_specific_main.txt", main_content)
 
     tasks, errors = parse_tags([str(main)], in_comment_signs=[])
 
@@ -238,22 +143,11 @@ Use ONLY
 
 
 def test_parse_tags_import_file_context_variables_reads_file_contents(tmp_path: Path) -> None:
-    payload = _write(tmp_path, "payload.txt", "payload contents\nline2\n")
-    main = _write(
-        tmp_path,
-        "main.txt",
-        f"""
-<file:PAYLOAD>
-{payload}
-<file:PAYLOAD/>
+    payload = _write(tmp_path, "payload.txt", _read_fixture("payload.txt"))
 
-<prompt:P>
-Use file payload
-<prompt:P/>
-
-{{P}}
-""".strip(),
-    )
+    main_template = _read_fixture("file_import_main.txt")
+    main_content = main_template.replace("__PAYLOAD_PATH__", str(payload))
+    main = _write(tmp_path, "file_import_main.txt", main_content)
 
     tasks, errors = parse_tags([str(main)], in_comment_signs=[])
 
@@ -266,19 +160,7 @@ Use file payload
 
 
 def test_parser_is_robust_to_whitespace_newlines_tabs_in_tag_bodies(tmp_path: Path) -> None:
-    file_path = _write(
-        tmp_path,
-        "main.txt",
-        """
-<context:WS>
-\n\n\t  lots of whitespace\n\t\tand tabs\n\n<context:WS/>
-
-<prompt:WS_PROMPT>
-\tUse WS\n\n<prompt:WS_PROMPT/>
-
-{WS_PROMPT}
-""".strip(),
-    )
+    file_path = _write(tmp_path, "whitespace_tabs.txt", _read_fixture("whitespace_tabs.txt"))
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
@@ -286,30 +168,18 @@ def test_parser_is_robust_to_whitespace_newlines_tabs_in_tag_bodies(tmp_path: Pa
     assert errors == []
 
     task = tasks[0]
-    assert "WS" in task.context_dict
-    assert "WS_PROMPT" in task.prompts
-    assert "WS_PROMPT" in task.prompt_outputs
+    assert task.context_dict["WS"] == "lots of whitespace\n\t\tand tabs"
+    assert task.prompts["WS_PROMPT"] == "Use WS"
+    assert task.prompt_outputs == ["WS_PROMPT"]
 
 
 def test_parser_handles_very_long_names_300_chars(tmp_path: Path) -> None:
-    # \\w+ supports long alphanumeric/underscore names; ensure we don't crash.
+    # \w+ supports long alphanumeric/underscore names; ensure we don't crash.
     long_name = "A" * 300
 
-    file_path = _write(
-        tmp_path,
-        "main.txt",
-        f"""
-<context:{long_name}>
-value
-<context:{long_name}/>
-
-<prompt:{long_name}>
-Do thing
-<prompt:{long_name}/>
-
-{{{long_name}}}
-""".strip(),
-    )
+    template = _read_fixture("long_names_template.txt")
+    content = template.replace("{LONG_NAME}", long_name)
+    file_path = _write(tmp_path, "long_names.txt", content)
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 
@@ -323,23 +193,9 @@ Do thing
 
 
 def test_parser_ignores_invalid_names_with_special_characters_without_crashing(tmp_path: Path) -> None:
-    # Names with '-' or spaces don't match the current regexes (\\w+ / [a-zA-Z0-9_]+).
+    # Names with '-' or spaces don't match the current regexes (\w+ / [a-zA-Z0-9_]+).
     # The robust behavior we want: parser does not crash and simply doesn't treat them as tags.
-    file_path = _write(
-        tmp_path,
-        "main.txt",
-        """
-<context:bad-name>
-value
-<context:bad-name/>
-
-<prompt:bad name>
-Nope
-<prompt:bad name/>
-
-{bad-name}
-""".strip(),
-    )
+    file_path = _write(tmp_path, "invalid_names.txt", _read_fixture("invalid_names.txt"))
 
     tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
 

@@ -68,6 +68,16 @@ def __tag_parsing_process(path):
     with open(path) as file:
         content = file.read()
 
+    # Fail fast on unknown tag prefixes of the form <prefix:...>.
+    # Output tags are of the form <TagName>...</TagName/> (no colon) and are allowed.
+    allowed_colon_prefixes = {"context", "prompt", "import", "file"}
+    for prefix in re.findall(r"<(\w+):", content):
+        if prefix not in allowed_colon_prefixes:
+            raise ValueError(
+                f"Unrecognized tag prefix '{prefix}:' in file {os.path.relpath(path)}. "
+                "Supported prefixes are: context, prompt, import, file."
+            )
+
     # Initialize error collection
     errors = []
 

@@ -288,3 +288,16 @@ def test_parse_tags_prompt_output_target_attempt_other_file_not_imported_raises_
     # Without a local <A>...</A/> tag, this is treated as invalid and rejected.
     assert tasks == []
     assert any("targets output tag 'A'" in e for e in errors)
+
+
+def test_parse_tags_unrecognized_colon_tag_prefix_reports_error(tmp_path: Path) -> None:
+    file_path = write_file(
+        tmp_path,
+        "unrecognized_colon_tag.txt",
+        read_fixture("unrecognized_colon_tag.txt"),
+    )
+
+    tasks, errors = parse_tags([str(file_path)], in_comment_signs=[])
+
+    assert tasks == []
+    assert any("Unrecognized tag prefix" in e and "prmpt" in e for e in errors)

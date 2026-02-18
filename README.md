@@ -406,3 +406,14 @@ You can find plans for the project and libraries you can learn in this project i
 
 ## License
 [Apache 2.0 License](LICENSE)
+## Development Setup (Poetry + pre-commit)
+
+For local development, this repository now uses Poetry and pre-commit.
+
+```bash
+poetry install
+poetry run pre-commit install
+poetry run pre-commit run --all-files
+```
+
+See [CONTRIBUTE.md](CONTRIBUTE.md) for the full contributor workflow.

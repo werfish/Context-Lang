@@ -65,6 +65,9 @@ norecursedirs = [
   "test/Generator Test",
   "test/integration/import_errors_test",
 ]
+markers = [
+  "llm: real LLM/provider integration tests (opt-in, requires network/credentials)",
+]
 
 [tool.ruff]
 line-length = 120

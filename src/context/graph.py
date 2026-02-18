@@ -15,7 +15,7 @@
 from typing import TypedDict
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langchain_openrouter import ChatOpenRouter
+from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
 from .config import Config
@@ -28,21 +28,32 @@ class GraphState(TypedDict):
 
 
 PROMPTS = {
-    "System": """You are a Coding Assistant. Your main role is to generate code based on user commands and context information. When specific <<<TAGNAME>>> <<<TAGNAME>>>/ markers are present in the input code, generate and return new functions or modifications to be inserted directly between these tags only, without altering any other part of the code. If no such markers are present, it indicates a request for refactoring or comprehensive code generation. In this case, please provide a full implementation of the code with all requested features and optimizations.
+    "System": """
+You are a Coding Assistant. Your main role is to generate code based on user commands and context information.
+
+When specific <<<TAGNAME>>> <<<TAGNAME>>>/ markers are present in the input code, generate and return new
+functions or modifications to be inserted directly between these tags only, without altering any other part
+of the code.
+
+If no such markers are present, it indicates a request for refactoring or comprehensive code generation.
+In this case, please provide a full implementation of the code with all requested features and optimizations.
 
 Follow these specific guidelines:
 - Describe code and any modifications by embedding comments in code blocks.
 - Focus on generating accurate, efficient code based on the provided instructions and context.
 - Return the whole modified code if no specific tags guide the insertion or modification point.
 
-Remember, your goal is to assist in generating accurate, efficient code based on the provided instructions and context."""
+Remember, your goal is to assist in generating accurate, efficient code based on the provided instructions and context.
+"""
 }
 
 
 def _call_openrouter(state: GraphState) -> GraphState:
-    llm = ChatOpenRouter(
+    # OpenRouter is OpenAI-compatible; use the LangChain OpenAI integration and point it at OpenRouter.
+    llm = ChatOpenAI(
         api_key=Config.Api_Key,
         model=Config.Model,
+        base_url="https://openrouter.ai/api/v1",
     )
 
     messages = [

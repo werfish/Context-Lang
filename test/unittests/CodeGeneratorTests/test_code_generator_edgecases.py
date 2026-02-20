@@ -96,7 +96,7 @@ def test_apply_code_raises_when_start_tag_missing(monkeypatch):
     task = _make_task(filepath=fake_path, prompts={"MyPrompt": "x"})
     task.prompt_outputs_tags = {"MyPrompt": ""}
 
-    with pytest.raises(StopIteration):
+    with pytest.raises(ValueError, match=r"Missing start tag <MyPrompt>"):
         code_generator.__apply_code("NEW", task, "MyPrompt")
 
 
@@ -108,11 +108,11 @@ def test_apply_code_raises_when_end_tag_missing(monkeypatch):
     task = _make_task(filepath=fake_path, prompts={"MyPrompt": "x"})
     task.prompt_outputs_tags = {"MyPrompt": ""}
 
-    with pytest.raises(StopIteration):
+    with pytest.raises(ValueError, match=r"Missing end tag <MyPrompt/>"):
         code_generator.__apply_code("NEW", task, "MyPrompt")
 
 
-def test_apply_code_end_tag_before_start_tag_inserts_at_start_plus_one(monkeypatch):
+def test_apply_code_end_tag_before_start_tag_raises(monkeypatch):
     fake_path = "memory://end_before_start.txt"
     fs = _FakeFS({fake_path: "<X/>\n<X>\nOLD\n"})
     monkeypatch.setattr(builtins, "open", fs.open)
@@ -120,10 +120,8 @@ def test_apply_code_end_tag_before_start_tag_inserts_at_start_plus_one(monkeypat
     task = _make_task(filepath=fake_path, prompts={"X": "x"})
     task.prompt_outputs_tags = {"X": ""}
 
-    code_generator.__apply_code("NEW", task, "X")
-
-    # Current behavior: slice assignment with end_line < start_line inserts at start_line+1.
-    assert fs.files[fake_path] == "<X/>\n<X>\nNEW\nOLD\n"
+    with pytest.raises(ValueError, match=r"end tag occurs before start tag"):
+        code_generator.__apply_code("NEW", task, "X")
 
 
 def test_apply_code_replaces_all_placeholder_lines(monkeypatch):
@@ -154,6 +152,22 @@ def test_apply_code_uses_first_tag_pair_when_multiple_blocks_exist(monkeypatch):
     code_generator.__apply_code("NEW", task, "T")
 
     assert fs.files[fake_path] == "<T>\nNEW\n<T/>\nmid\n<T>\nOLD2\n<T/>\n"
+
+
+def test_read_tag_contents_raises_helpful_error_when_target_tag_missing(monkeypatch):
+    monkeypatch.setattr(Config, "MockLLM", False)
+
+    fake_path = "memory://missing_target_tag.txt"
+    fs = _FakeFS({fake_path: "{P}\n"})
+    monkeypatch.setattr(builtins, "open", fs.open)
+
+    task = _make_task(filepath=fake_path, prompts={"P": "x"})
+    task.prompt_output_targets = {"P": "Missing"}
+
+    monkeypatch.setattr(code_generator, "generate_code_with_chat", lambda *_: json.dumps({"code": "NEW"}))
+
+    with pytest.raises(ValueError, match=r"Missing output tag block"):
+        code_generator.__single_file_flow(task)
 
 
 def test_prompt_order_controls_last_write_when_two_prompts_target_same_tag(monkeypatch):

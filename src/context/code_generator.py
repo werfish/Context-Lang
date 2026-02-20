@@ -66,6 +66,32 @@ def __single_file_flow(task):
                 __apply_code(code, task, prompt_name)
 
 
+def __find_tag_block_lines(*, lines: list[str], filepath: str, tag_name: str) -> tuple[int, int]:
+    """Return (start_line, end_line) indices for a <tag> ... <tag/> block.
+
+    Raises ValueError with a helpful message instead of leaking StopIteration.
+    """
+
+    start_tag = f"<{tag_name}>"
+    end_tag = f"<{tag_name}/>"
+
+    start_line = next((i for i, line in enumerate(lines) if start_tag in line), None)
+    end_line = next((i for i, line in enumerate(lines) if end_tag in line), None)
+
+    if start_line is None and end_line is None:
+        raise ValueError(f"Missing output tag block for '{tag_name}' in file: {filepath}")
+    if start_line is None:
+        raise ValueError(f"Missing start tag <{tag_name}> in file: {filepath}")
+    if end_line is None:
+        raise ValueError(f"Missing end tag <{tag_name}/> in file: {filepath}")
+    if end_line < start_line:
+        raise ValueError(
+            f"Output tag block is malformed for '{tag_name}' (end tag occurs before start tag) in file: {filepath}"
+        )
+
+    return start_line, end_line
+
+
 def __read_tag_contents_from_file(filepath: str, tag_name: str) -> str:
     """Read the current contents between <tag_name> and <tag_name/> from disk.
 
@@ -73,14 +99,10 @@ def __read_tag_contents_from_file(filepath: str, tag_name: str) -> str:
     up-to-date code that it is supposed to refine.
     """
 
-    start_tag = f"<{tag_name}>"
-    end_tag = f"<{tag_name}/>"
-
     with open(filepath, encoding="utf-8") as f:
         lines = f.readlines()
 
-    start_line = next(i for i, line in enumerate(lines) if start_tag in line)
-    end_line = next(i for i, line in enumerate(lines) if end_tag in line)
+    start_line, end_line = __find_tag_block_lines(lines=lines, filepath=filepath, tag_name=tag_name)
 
     content_lines = lines[start_line + 1 : end_line]
     return "".join(content_lines).strip("\n")
@@ -136,12 +158,11 @@ def __apply_code(code, task, prompt_name):
     # <> output tag replacement (and output-target mapping)
     if output_target is not None or prompt_name in task.prompt_outputs_tags:
         tag_name = output_target or prompt_name
-        start_tag = f"<{tag_name}>"
-        end_tag = f"<{tag_name}/>"
 
-        # Find the lines with the start and end tags
-        start_line = next(i for i, line in enumerate(original_code_lines) if start_tag in line)
-        end_line = next(i for i, line in enumerate(original_code_lines) if end_tag in line)
+        # Find the lines with the start and end tags (with validation)
+        start_line, end_line = __find_tag_block_lines(
+            lines=original_code_lines, filepath=task.filepath, tag_name=tag_name
+        )
 
         # Replace the lines between the tags with the new code
         # We add a newline character at the end of each line in the generated code

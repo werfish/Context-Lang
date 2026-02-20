@@ -179,4 +179,11 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# OpenClaw / local scratch artifacts
+.openclaw_*
+
+# JS duplication tool output (if generated)
+.jscpd-report/
+report/
+
 # End of https://www.toptal.com/developers/gitignore/api/python

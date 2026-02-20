@@ -55,6 +55,7 @@ ruff = "^0.6.8"
 bandit = "^1.7.9"
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
+radon = "^6.0.1"
 
 [tool.poetry.scripts]
 Context = "context.Context:main"
